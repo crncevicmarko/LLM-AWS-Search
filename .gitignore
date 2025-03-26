@@ -29,3 +29,5 @@ __pycache__/
 # Ignore CDK output directory for the backend
 backend/cdk.out
 
+.env
+
