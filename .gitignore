@@ -1,0 +1,31 @@
+# Ignore macOS-specific files
+.DS_Store
+
+# Ignore DS_Store files in backend and frontend
+backend/.DS_Store
+frontend/llm-aws-search/.DS_Store
+
+# Ignore Angular build and configuration files
+frontend/llm-aws-search/.angular/
+
+# Ignore node_modules in the frontend
+frontend/llm-aws-search/node_modules/
+
+# Ignore swap files created by vim
+*.swp
+
+# Ignore package-lock.json (if you don't want to track it)
+package-lock.json
+
+# Ignore Python cache and virtual environments
+__pycache__/
+.pytest_cache
+.venv
+*.egg-info
+
+# CDK asset staging directory
+.cdk.staging
+
+# Ignore CDK output directory for the backend
+backend/cdk.out
+
