@@ -1,4 +1,5 @@
 from aws_cdk import (
+    aws_lambda as _lambda,
     aws_apigateway as apigateway,
     Stack,
 
@@ -19,8 +20,15 @@ class BackendStack(Stack):
                                         "allow_methods": apigateway.Cors.ALL_METHODS, 
                                     }
                                     )
+        get_user_input_lambda_func = _lambda.Function(
+            self, "TestLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="lambda_function.handler",
+            code=_lambda.Code.from_asset("lambda"),
+        )
 
-
+        test_resource = self.api.root.add_resource("test-chatbot")
+        test_resource.add_method("POST", apigateway.LambdaIntegration(get_user_input_lambda_func))
         # example resource
         # queue = sqs.Queue(
         #     self, "BackendQueue",
