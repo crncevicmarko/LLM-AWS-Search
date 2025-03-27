@@ -41,6 +41,15 @@ class BackendStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
             description="Layer with requests module"
         )
+
+        dotenv_layer = _lambda.LayerVersion(
+            self, "DotEnvLayer",
+            code=_lambda.Code.from_asset("dotenv-layer/dotenv-layer.zip"),  # putanja do zip fajla
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+            description="Layer with dotenv module"
+        )
+ 
+
         def create_lambda_function(id, name, handler, include_dir, method, layers):
             function = _lambda.Function(
                 self, id,
@@ -52,7 +61,7 @@ class BackendStack(Stack):
                 memory_size=512,
                 timeout=Duration.seconds(60),     
                 environment={
-
+              
                 },
                 role=lambda_role
             )
@@ -64,7 +73,7 @@ class BackendStack(Stack):
             "getTickets.lambda_handler",  # handler
             "backend/getTickets",  # include_dir
             "GET",  # method
-            [request_layer]
+            [request_layer,dotenv_layer]
         )
 
         get_tickets_integration = apigateway.LambdaIntegration(get_tickets_lambda_function) #integracija izmedju lambda fje i API gateway-a, sto znaci da API Gateway može pozivati Lambda funkciju kao odgovor na HTTP zahteve. 

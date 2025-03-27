@@ -1,30 +1,32 @@
 import json
 import boto3
 import requests
+from requests.auth import HTTPBasicAuth
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv,find_dotenv
 
-JIRA_URL = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000'
-# JIRA API Token i email
-JIRA_EMAIL = 'grubor.masa@gmail.com'
-load_dotenv()
-
-# Preuzmi token iz okruženja
-JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
 def lambda_handler(event, context):
 
-    auth = (JIRA_EMAIL, JIRA_API_TOKEN)
+    env_path=".env"
+    load_dotenv(dotenv_path=env_path)
+    
+    JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
+    JIRA_EMAIL = os.getenv("JIRA_EMAIL")
+    JIRA_URL=os.getenv("JIRA_URL")
+    
+    auth = HTTPBasicAuth(JIRA_EMAIL, JIRA_API_TOKEN)
+  
     
     try:
-     
+
         response = requests.get(JIRA_URL, auth=auth)
 
         if response.status_code == 200:
             tickets = response.json()
-            print(json.dumps(tickets["issues"], indent=2))
+            print(json.dumps(tickets['issues'], indent=2))
             return {
                 'statusCode': 200,
-                'body': json.dumps('Tickets retrieved successfully!')
+                'body': json.dumps(tickets['issues'])
             }
         else:
             
