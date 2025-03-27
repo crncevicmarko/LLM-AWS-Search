@@ -7,10 +7,10 @@ import { Injectable } from "@angular/core";
   })
 export class AppService{
     constructor(private http: HttpClient) { }
-    apiHost:string="https://4ii70rdoj7.execute-api.eu-north-1.amazonaws.com/";
+    apiHost:string="https://pyop5xjxr5.execute-api.eu-west-1.amazonaws.com/prod";
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json'})
     recieveUserInput(message: any): Observable<any>{
         console.log(this.headers)
-        return this.http.post<any>(this.apiHost+ 'retrieveUserInput',message, {headers: this.headers})
+        return this.http.post<any>(this.apiHost+ '/test-chatbot',message, {headers: this.headers})
     }
     }
