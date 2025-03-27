@@ -84,7 +84,7 @@ def filter_issues(issues_data, comments_data):
             "summary": fields.get("summary"),
             "status": fields.get("status", {}).get("name"),
             "priority": fields.get("priority", {}).get("name"),
-            "description": fields.get("description"),
+            "description": fields.get("description") if fields.get("description") else "",
             "project": fields.get("project", {}).get("name"),
             "issuetype": fields.get("issuetype", {}).get("name"),
             "creator": fields.get("creator", {}).get("displayName"),
