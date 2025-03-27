@@ -18,7 +18,7 @@ def lambda_handler(event, context):
     JIRA_API_TOKEN = secrets["JIRA_API_TOKEN"]
     JIRA_EMAIL = secrets["JIRA_EMAIL"]
     JIRA_URL = secrets["JIRA_URL"]
-    JIRA_URL_COMMENTS = secrets["JIRA_URL_COMMENTS"]
+    JIRA_URL_COMMENTS = os.getenv("JIRA_URL_COMMENTS")
 
     auth = HTTPBasicAuth(JIRA_EMAIL, JIRA_API_TOKEN)
   
