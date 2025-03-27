@@ -2,8 +2,10 @@
 <main id="main">
   <div class="chat-box-container">
     <h1 class="chat-box-header">Chat AI</h1>
-    <div class="chat-box">
-
+    <div>
+      <div *ngFor="let message of messages" class="chat-box">
+        <p>{{ message }}</p>
+      </div>
     </div>
   </div>
   <form class="chat-input-container" (ngSubmit)="onSubmit()">

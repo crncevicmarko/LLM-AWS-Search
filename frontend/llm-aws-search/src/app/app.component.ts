@@ -13,6 +13,7 @@ export class AppComponent {
 
 userInput: string = ''; // Variable to bind input value
 result:string='';
+messages:string [] = [];  // Array to store the chat messages
 constructor(private appService: AppService) { }
 
 
@@ -20,11 +21,12 @@ constructor(private appService: AppService) { }
   onSubmit() {
 
     // Prepare the data payload
-    const payload = { input: this.userInput };
-
+    const payload = { message: this.userInput };
+    this.messages.push("You: "+this.userInput);
     // Send the POST request
     this.appService.recieveUserInput(payload).subscribe(res=> { this.result = res; });
-    
+    console.log(this.result);
+    this.messages.push("ChatBot: "+this.result);
     console.log(payload);
   }
 }
