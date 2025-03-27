@@ -72,6 +72,8 @@ class BackendStack(Stack):
                 timeout=Duration.seconds(60),     
                 environment={
                     "JIRA_SECRET_ARN": jira_secret.secret_arn,
+                    "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
+                    "JIRA_EMAIL" :'grubor.masa@gmail.com',
                     "JIRA_URL_COMMENTS": 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&fields=comment'
                 },
                 role=lambda_role
@@ -91,7 +93,7 @@ class BackendStack(Stack):
 
         self.api.root.add_resource("getTickets").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
 
-     
+
 
 
 
