@@ -2,9 +2,10 @@ from aws_cdk import (
     aws_apigateway as apigateway,
     Stack,
     aws_lambda as _lambda,
-    aws_iam as iam, BundlingOptions, Duration
-
+    aws_iam as iam, BundlingOptions, Duration,
+    aws_secretsmanager as secretsmanager
 )
+import os
 from constructs import Construct
 
 class BackendStack(Stack):
@@ -34,6 +35,15 @@ class BackendStack(Stack):
         lambda_role.add_managed_policy(
         iam.ManagedPolicy.from_aws_managed_policy_name("AmazonAPIGatewayInvokeFullAccess")
         )
+        lambda_role.add_managed_policy(
+        iam.ManagedPolicy.from_aws_managed_policy_name("SecretsManagerReadWrite")
+        )
+
+        jira_secret = secretsmanager.Secret.from_secret_name_v2(self, "JiraSecret", "JIRA_CREDENTIALS")
+
+       
+      
+        jira_secret.grant_read(lambda_role)
         
         request_layer = _lambda.LayerVersion(
             self, "RequestsLayer",
@@ -61,7 +71,7 @@ class BackendStack(Stack):
                 memory_size=512,
                 timeout=Duration.seconds(60),     
                 environment={
-              
+                    "JIRA_SECRET_ARN": jira_secret.secret_arn 
                 },
                 role=lambda_role
             )

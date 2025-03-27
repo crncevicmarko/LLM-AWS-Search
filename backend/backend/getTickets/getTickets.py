@@ -3,20 +3,24 @@ import boto3
 import requests
 from requests.auth import HTTPBasicAuth
 import os
-from dotenv import load_dotenv,find_dotenv
+from dotenv import load_dotenv
+
+def get_secret(secret_arn):
+    client = boto3.client("secretsmanager")
+    response = client.get_secret_value(SecretId=secret_arn)
+    secret = json.loads(response["SecretString"])
+    return secret
+
 
 def lambda_handler(event, context):
 
-    env_path=".env"
-    load_dotenv(dotenv_path=env_path)
-    
-    JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
-    JIRA_EMAIL = os.getenv("JIRA_EMAIL")
-    JIRA_URL=os.getenv("JIRA_URL")
-    
+    secret_arn = os.getenv("JIRA_SECRET_ARN")
+    secrets = get_secret(secret_arn)
+    JIRA_API_TOKEN = secrets["JIRA_API_TOKEN"]
+    JIRA_EMAIL = secrets["JIRA_EMAIL"]
+    JIRA_URL = secrets["JIRA_URL"]
     auth = HTTPBasicAuth(JIRA_EMAIL, JIRA_API_TOKEN)
   
-    
     try:
 
         response = requests.get(JIRA_URL, auth=auth)
