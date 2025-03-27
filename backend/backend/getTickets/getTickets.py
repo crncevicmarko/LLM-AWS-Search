@@ -29,7 +29,6 @@ def lambda_handler(event, context):
 
         if response.status_code == 200 and response_with_comments.status_code == 200:
             tickets = filter_issues(response.json(), response_with_comments.json())
-            print(json.dumps(tickets, indent=2))
             return {
                 'statusCode': 200,
                 'body': json.dumps(tickets)
