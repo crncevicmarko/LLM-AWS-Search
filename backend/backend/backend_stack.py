@@ -73,7 +73,8 @@ class BackendStack(Stack):
                 environment={
                     "JIRA_SECRET_ARN": jira_secret.secret_arn,
                     "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
-                    "JIRA_EMAIL" :'grubor.masa@gmail.com'
+                    "JIRA_EMAIL" :'grubor.masa@gmail.com',
+                    "JIRA_URL_COMMENTS": 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&fields=comment'
                 },
                 role=lambda_role
             )
