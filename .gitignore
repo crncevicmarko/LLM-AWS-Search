@@ -29,5 +29,7 @@ __pycache__/
 # Ignore CDK output directory for the backend
 backend/cdk.out
 
-.env
-
+# Ignore layers
+backend/layers/*.zip
+!backend/layers/create_aws_layer.sh
+!backend/layers/layer_requirements.txt
