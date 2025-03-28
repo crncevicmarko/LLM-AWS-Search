@@ -18,7 +18,7 @@ do
 
   # Define directories and files for each package
   LAYER_NAME="${package//\//_}" 
-  PACKAGE_DIR="$LAYER_NAME"  # Create 'python' folder inside the package folder
+  PACKAGE_DIR="python"  # Create 'python' folder inside the package folder
   ZIP_FILE="$LAYER_NAME.zip"  # Zip file will be named after the package
 
   # Clean up any existing folder and zip file
@@ -37,12 +37,9 @@ do
     continue
   fi
 
-  # Change directory to the parent of the 'python' folder
-  cd "$LAYER_NAME"
-
   # For PowerShell, use Compress-Archive to create the zip file
   # PowerShell command to compress the folder (this would require running the script in PowerShell)
-  powershell Compress-Archive -Path "$PACKAGE_DIR" -DestinationPath "../$ZIP_FILE"
+  powershell Compress-Archive -Path "$PACKAGE_DIR" -DestinationPath "$ZIP_FILE"
 
   # Check if the zip was successful (in PowerShell, you can check the $?) 
   if [ $? -eq 0 ]; then
@@ -52,7 +49,6 @@ do
   fi
 
   # Clean up by removing the folder used to create the zip
-  cd ..
-  rm -rf "$LAYER_NAME"
+  rm -rf "$PACKAGE_DIR"
 
 done < "$REQUIREMENTS_FILE"
