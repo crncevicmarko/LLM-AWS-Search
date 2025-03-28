@@ -9,8 +9,8 @@
       </div>
     </div>
   </div>
-  <form class="chat-input-container" (ngSubmit)="onSubmit()">
-    <input [(ngModel)]="userInput" name="input" class="chat-input" placeholder="Type something..." required />
+  <form class="chat-input-container" (ngSubmit)="onSubmit()" >
+    <input     #chatInput    [(ngModel)]="userInput" name="input" class="chat-input" placeholder="Type something..." required />
     <button class="chat-submit" type="submit" name="submit" [disabled]="thinking">Submit</button>
   </form>
 </main>

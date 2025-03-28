@@ -113,8 +113,9 @@ body {
   
   .chat-input {
     height: 40px;
-    width: auto;
-    display: inline-block;
+    max-width: 80%;
+    display: block;
+    overflow-x: hidden;
     flex-grow: 1;
     padding: 2px 2px 2px 2px;
     margin: 0 4px 0 4px;
@@ -139,8 +140,10 @@ body {
     border: 2px solid black;
     background-color: #d06c5a;
     font-size: 18px;
-    border-radius: 15px;
-
+    border-radius: 15px;  resize: none; /* No manual resizing */
+    overflow: hidden;
+    transition: height 0.1s ease;
+    white-space: no-wrap;
   }
   
   .chat-submit:hover {
