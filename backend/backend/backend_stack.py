@@ -45,20 +45,14 @@ class BackendStack(Stack):
 
         request_layer = _lambda.LayerVersion(
             self, "RequestsLayer",
-            code=_lambda.Code.from_asset("layer/request-layer.zip"),  
+            code=_lambda.Code.from_asset("layers/requests.zip"),  
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
             description="Layer with requests module"
         )
 
-        dotenv_layer = _lambda.LayerVersion(
-            self, "DotEnvLayer",
-            code=_lambda.Code.from_asset("layer/dotenv-layer.zip"),  
-            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-            description="Layer with dotenv module"
-        )
         pinecone_layer = _lambda.LayerVersion(
             self, "PineconeLayer",
-            code=_lambda.Code.from_asset("layer/pinecone.zip"),
+            code=_lambda.Code.from_asset("layers/pinecone.zip"),
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
         )
  
@@ -82,7 +76,7 @@ class BackendStack(Stack):
             "saveIssues.handler",  
             "lambda",  
             "GET",  
-            [request_layer, dotenv_layer, pinecone_layer],
+            [request_layer, pinecone_layer],
             {
                 "JIRA_SECRET_ARN": jira_secret.secret_arn,
                 "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
@@ -94,11 +88,7 @@ class BackendStack(Stack):
 
         get_tickets_integration = apigateway.LambdaIntegration(get_tickets_lambda_function)  
 
-        self.api.root.add_resource("getTickets").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
-
-        bucket = s3.Bucket(self, "my-bucket",
-                   bucket_name="my-unique-bucket-name12312312311",
-                   removal_policy=RemovalPolicy.DESTROY)
+        self.api.root.add_resource("SaveIssues").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
 
         lambda_role = iam.Role(self, "LambdaBedrockRole",
                                assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
