@@ -44,8 +44,8 @@ body {
     color: #EEEEEE;
     border-radius: 15px;
     opacity: 0.8;
-    overflow-y: auto;
-  }
+    overflow-y:auto;
+    }
 
   .chat-box p {
     margin: 0;

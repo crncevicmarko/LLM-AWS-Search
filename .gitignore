@@ -32,3 +32,4 @@ backend/cdk.out
 frontend/llm-aws-search/package.json
 frontend/llm-aws-search/angular.json
 frontend/llm-aws-search/package-lock.json
+frontend/llm-aws-search/angular.json
