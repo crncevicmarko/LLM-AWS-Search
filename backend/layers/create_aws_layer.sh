@@ -3,6 +3,10 @@
 # Define variables
 REQUIREMENTS_FILE="layer_requirements.txt"
 
+# Delete all zip files in the current directory
+echo "Deleting all existing .zip files in the folder..."
+rm -f *.zip
+
 # Read the requirements file line by line
 while IFS= read -r package
 do
@@ -14,7 +18,7 @@ do
 
   # Define directories and files for each package
   LAYER_NAME="${package//\//_}" 
-  PACKAGE_DIR="$LAYER_NAME/python"  # Create 'python' folder inside the package folder
+  PACKAGE_DIR="$LAYER_NAME"  # Create 'python' folder inside the package folder
   ZIP_FILE="$LAYER_NAME.zip"  # Zip file will be named after the package
 
   # Clean up any existing folder and zip file
@@ -36,10 +40,11 @@ do
   # Change directory to the parent of the 'python' folder
   cd "$LAYER_NAME"
 
-  # Create the zip file by zipping only the 'python' folder (no parent directories)
-  zip -r "../$ZIP_FILE" python/*
+  # For PowerShell, use Compress-Archive to create the zip file
+  # PowerShell command to compress the folder (this would require running the script in PowerShell)
+  powershell Compress-Archive -Path "$PACKAGE_DIR" -DestinationPath "../$ZIP_FILE"
 
-  # Check if the zip was successful
+  # Check if the zip was successful (in PowerShell, you can check the $?) 
   if [ $? -eq 0 ]; then
     echo "$package Lambda layer package $ZIP_FILE created successfully."
   else
