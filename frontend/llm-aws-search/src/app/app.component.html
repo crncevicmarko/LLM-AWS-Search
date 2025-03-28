@@ -2,8 +2,9 @@
 <main id="main">
   <div class="chat-box-container">
     <h1 class="chat-box-header">Chat AI</h1>
-    <div class="chat-box">
+    <div  class="chat-box">
       <div *ngFor="let message of messages" >
+        <p class="time-style"> {{ dateTime }}</p>
         <p>{{ message }}</p>
       </div>
     </div>

@@ -3,7 +3,6 @@ body {
     margin: 0;
     font-family: sans-serif;
     -ms-overflow-style: scrollbar;
-    overflow-style: scrollbar;
     background-color: #222831;
   }
   
@@ -42,15 +41,14 @@ body {
     border: 2px solid black;
     flex-grow: 1;
     background-color: #31363F;
-    overflow-y: scroll;
     color: #EEEEEE;
     border-radius: 15px;
-    opacity: 0.5;
+    opacity: 0.8;
+    overflow-y: auto;
   }
 
   .chat-box p {
     margin: 0;
-    padding: 6px;
     font-size: 26px;
   }
   
@@ -125,7 +123,7 @@ body {
     background-color: #31363F;
     border-radius: 15px;
     color: #EEEEEE;
-    opacity: 0.5;
+    opacity: 0.8;
 
   }
   
@@ -153,6 +151,14 @@ body {
   .chat-submit:focus {
     outline: 0;
   }
+
+  .time-style {
+    font-family: 'Courier New', Courier, monospace; 
+    font-size: 1rem !important;
+    color: #d06c5a; 
+    padding-top: 10px;
+  }
+  
   
   /* Mobile Responsive Design */
   @media screen and (max-width: 480px) {
@@ -168,4 +174,4 @@ body {
       float: right;
     }
   }
-  
+ 
