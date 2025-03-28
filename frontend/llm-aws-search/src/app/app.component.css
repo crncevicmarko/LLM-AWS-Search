@@ -1,19 +1,21 @@
 /* General Body and Layout */
+html{
+  padding: 0%;
+}
 body {
-    margin: 0;
+    margin: -8px!important; 
     font-family: sans-serif;
     -ms-overflow-style: scrollbar;
     background-color: #222831;
   }
   
   main {
-    margin: auto;
+    margin: 0;
     height: 100vh;
     background-color: #76ABAE;
     position: relative;
     display: flex;
     flex-direction: column;
-    border-radius: 15px;
     
   }
   
@@ -141,7 +143,7 @@ body {
     background-color: #d06c5a;
     font-size: 18px;
     border-radius: 15px;  resize: none; /* No manual resizing */
-    overflow: hidden;
+    overflow-x:hidden;
     transition: height 0.1s ease;
     white-space: no-wrap;
   }
