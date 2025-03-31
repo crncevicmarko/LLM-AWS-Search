@@ -63,41 +63,36 @@ body {
   .ai,
   .person {
     overflow: auto;
-    margin: 4px;
-    border: 2px solid black;
-    border-radius: 8px;
     display: inline-block;
   }
   
   .ai {
-    text-align: left;
-    margin-right: 36px;
-    border-color: red;
-    float: left;
-    border-bottom-left-radius: 0px;
+    color: red;
   }
   
   .person {
-    text-align: left;
-    margin-left: 36px;
-    border-color: blue;
-    float: right;
-    border-bottom-right-radius: 0px;
+    color: blue;
   }
   
-  .ai-date,
-  .person-date {
+  .ai-block,
+  .person-block {
     font-size: 10px;
     clear: both;
+    display: inline-block;
+  }
+  .ai-person-container {
+    display: flex;
+    flex-direction: column; /* Stack the messages vertically */
+    width: 100%; /* Ensures full width */
   }
   
-  .ai-date {
-    float: left;
+  .ai-block {
+    align-self:flex-start;
     margin-left: 6px;
   }
   
-  .person-date {
-    float: right;
+  .person-block {
+    align-self:flex-end;
     margin-right: 6px;
   }
   

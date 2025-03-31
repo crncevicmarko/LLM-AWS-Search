@@ -4,13 +4,22 @@
     <div class="chat-box-container">
       <h1 class="chat-box-header">Chat AI</h1>
       <div  class="chat-box" #chatBox>
-        <div *ngFor="let message of messages" >
-          <p class="time-style"> {{ time }}</p>
-          <p>{{ message }}</p>
+        <div *ngFor="let umessage of userMessages; let i = index" class="ai-person-container">
+          <div class="person-block">
+            <p class="time-style">{{ time }}</p>
+            <p class="person">You: </p>
+            <p style="display: inline-block;"> {{umessage}}</p>
+          </div>
+          <div class="ai-block">
+            <p class="time-style">{{ time }}</p>
+            <p class="ai">ChatBot: </p>
+            <p style="display: inline-block;">{{ botMessages[i] }}</p>
+          </div>
         </div>
       </div>
     </div>
     <form class="chat-input-container" (ngSubmit)="onSubmit()">
+    <form class="chat-input-container" (ngSubmit)="onSubmit()" #chatForm="ngForm">
       <input
         #chatInput
         [(ngModel)]="userInput"
@@ -19,7 +28,7 @@
         placeholder="Type something..."
         required
         (input)="resizeInput(chatInput)" />
-        <button class="chat-submit" type="submit" name="submit" [disabled]="thinking || !userInput.trim()">
+        <button class="chat-submit" type="submit" name="submit" [disabled]="!chatForm.valid || thinking || !userInput.trim()">
           <span *ngIf="!thinking">
             <i class="fas fa-paper-plane"></i> 
           </span>

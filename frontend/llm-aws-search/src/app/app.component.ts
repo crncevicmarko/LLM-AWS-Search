@@ -16,31 +16,42 @@ thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
 @ViewChild('chatInput') chatInput: ElementRef | undefined;
 userInput: string = ''; // Variable to bind input value
-messages:string [] = [];  // Array to store the chat messages
+userMessages:string [] = [];  // Array to store the chat messages
+botMessages:string[]=[];
 time:string=new Date().toLocaleTimeString();
 constructor(private appService: AppService,private cdRef: ChangeDetectorRef) { }
 
 
   // Function to handle form submission
   onSubmit() {
-
+    console.log(this.userInput);
+    if (this.isSameAsLastPrompt())
+    {
+      alert('Your input is the same as the last prompt. Please enter something different.');
+      return
+    }
     // Prepare the data payload
     const payload = { message: this.userInput };
-    this.messages.push("You: "+this.userInput);
+    this.userMessages.push(this.userInput);
     this.thinking=true;
     this.userInput="";
     // Send the POST requestq
     this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = JSON.parse(res.body);
     console.log(parsedResponse);
-    const botResponse = "ChatBot: " + parsedResponse.message;
     //console.log(payload);
       setTimeout(() => {
-        this.messages.push(botResponse);
+        this.botMessages.push(parsedResponse);
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });
   }
   
+  isSameAsLastPrompt(): boolean {
+    console.log(this.userMessages[this.userMessages.length-1]);
+    console.log(this.userInput);
+    return this.userMessages[this.userMessages.length-1] === this.userInput;
+  }
+
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
