@@ -28,8 +28,12 @@ __pycache__/
 
 # Ignore CDK output directory for the backend
 backend/cdk.out
-
+#Ignore NG version
 frontend/llm-aws-search/package.json
 frontend/llm-aws-search/angular.json
 frontend/llm-aws-search/package-lock.json
 frontend/llm-aws-search/angular.json
+# Ignore layers
+backend/layers/*.zip
+!backend/layers/create_aws_layer.sh
+!backend/layers/layer_requirements.txt
