@@ -4,10 +4,12 @@ import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
 
 @NgModule({
   declarations: [
-    AppComponent,  // Declare your components here
+    AppComponent,
+    MarkdownDisplayComponent  // Declare your components here
   ],
   imports: [
     BrowserModule,  // Import essential modules here

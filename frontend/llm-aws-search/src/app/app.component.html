@@ -13,7 +13,7 @@
           <div class="ai-block">
             <p class="time-style">{{ time }}</p>
             <p class="ai">ChatBot: </p>
-            <p class="ai-text">{{ botMessages[i] }}</p>
+            <p class="ai-text" [innerHTML]="botMessages[i]"></p>
           </div>
         </div>
       </div>

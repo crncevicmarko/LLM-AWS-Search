@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AppService } from './services/app.services';
 import { ChangeDetectorRef } from '@angular/core';
+import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -19,12 +20,11 @@ userInput: string = ''; // Variable to bind input value
 userMessages:string [] = [];  // Array to store the chat messages
 botMessages:string[]=[];
 time:string=new Date().toLocaleTimeString();
-constructor(private appService: AppService,private cdRef: ChangeDetectorRef) { }
-
+htmlContent:string="";
+constructor(private appService: AppService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent) { }
 
   // Function to handle form submission
   onSubmit() {
-    console.log(this.userInput);
     if (this.isSameAsLastPrompt())
     {
       alert('Your input is the same as the last prompt. Please enter something different.');
@@ -35,20 +35,19 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef) { }
     this.userMessages.push(this.userInput);
     this.thinking=true;
     this.userInput="";
-    // Send the POST requestq
+    // Send the POST request
+
     this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = JSON.parse(res.body);
-    console.log(parsedResponse);
-    //console.log(payload);
       setTimeout(() => {
-        this.botMessages.push(parsedResponse);
+        this.botMessages.push(this.mdComp.convertMarkdownToHTML(parsedResponse));
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });
   }
   
+
   isSameAsLastPrompt(): boolean {
-    console.log(this.userMessages[this.userMessages.length-1]);
-    console.log(this.userInput);
+
     return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
 

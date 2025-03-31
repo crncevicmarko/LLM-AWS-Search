@@ -1,16 +1,16 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Injectable } from "@angular/core";
+import { environment } from '../../enviroments/enviroment';
 
 @Injectable({
     providedIn: 'root'
   })
 export class AppService{
     constructor(private http: HttpClient) { }
-    apiHost:string="https://pyop5xjxr5.execute-api.eu-west-1.amazonaws.com/prod";
+    apiHost: string=environment.apiUrl;
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json'})
     recieveUserInput(text: any): Observable<any>{
-        console.log(text)
         return this.http.post<any>(this.apiHost+ '/test-chatbot',text, {headers: this.headers})
     }
     }
