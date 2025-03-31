@@ -127,35 +127,43 @@ body {
     border-radius: 15px;
     color: #EEEEEE;
     opacity: 0.8;
+    
 
   }
   
   .chat-input:focus {
     outline: 0;
   }
+
+  .chat-input::placeholder {
+    font-size: 25px; 
+    color: gray; 
+    opacity: 0.7; 
+    
+  }
   
   .chat-submit {
     width: 70px;
     height: 47px !important;
-    padding: 2px 2px 2px 2px;
-    margin-right: 4px;
+    padding: 5px;
     border: 2px solid black;
     background-color: #d06c5a;
     font-size: 18px;
-    border-radius: 15px;  resize: none; /* No manual resizing */
-    overflow-x:hidden;
-    transition: height 0.1s ease;
-    white-space: no-wrap;
+    border-radius: 15px;
+    transition: background-color 0.3s ease;
   }
   
-  .chat-submit:hover {
-    cursor: pointer;
-    background-color: #76ABAE;
+  .chat-submit:disabled {
+    background-color: gray;
+    cursor: not-allowed;
   }
   
-  .chat-submit:focus {
-    outline: 0;
+  /* Spinner icon */
+  .fa-spinner {
+    font-size: 20px;
+    color: white;
   }
+  
 
   .time-style {
     font-family: 'Courier New', Courier, monospace; 

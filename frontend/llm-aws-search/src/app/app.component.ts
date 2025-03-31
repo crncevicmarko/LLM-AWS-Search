@@ -32,12 +32,15 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef) { }
     // Send the POST requestq
     this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = JSON.parse(res.body);
     console.log(parsedResponse);
-    this.messages.push("ChatBot: "+parsedResponse.message);
-    this.thinking=false;
+    const botResponse = "ChatBot: " + parsedResponse.message;
     //console.log(payload);
-    }
-  );
+      setTimeout(() => {
+        this.messages.push(botResponse);
+        this.thinking = false; // Enable button after delay
+      }, 1000); // Adjust the delay as needed
+    });
   }
+  
   ngAfterViewChecked(): void {
     this.autoScroll();
   }

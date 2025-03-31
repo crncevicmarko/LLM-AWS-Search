@@ -10,10 +10,25 @@
         </div>
       </div>
     </div>
-    <form class="chat-input-container" (ngSubmit)="onSubmit()" #chatForm="ngForm" >
-      <input     #chatInput    [(ngModel)]="userInput" name="input" class="chat-input" 
-      placeholder="Type something..." required (input)="resizeInput(chatInput)"/>
-      <button class="chat-submit" type="submit" name="submit" [disabled]="!chatForm.valid || thinking">Submit</button>
+    <form class="chat-input-container" (ngSubmit)="onSubmit()">
+      <input
+        #chatInput
+        [(ngModel)]="userInput"
+        name="input"
+        class="chat-input"
+        placeholder="Type something..."
+        required
+        (input)="resizeInput(chatInput)" />
+        <button class="chat-submit" type="submit" name="submit" [disabled]="thinking || !userInput.trim()">
+          <span *ngIf="!thinking">
+            <i class="fas fa-paper-plane"></i> 
+          </span>
+          <span *ngIf="thinking">
+            <i class="fas fa-spinner fa-spin"></i> 
+          </span>
+        </button>
+        
+        
     </form>
   </main>
 </body>
