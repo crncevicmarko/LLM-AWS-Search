@@ -99,7 +99,8 @@ class BackendStack(Stack):
                                managed_policies=[
                                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
                                    iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"),
-                                   iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess")
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess"),
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("SecretsManagerReadWrite") 
                                ])
         
         setPineconeDB = create_lambda_function(
@@ -112,4 +113,27 @@ class BackendStack(Stack):
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
             }
         )
+
+
+        jiraWebHookFunction = create_lambda_function(
+            "jiraWebhookFunction",
+            "jiraWebhookHandler.lambda_handler",
+            "lambda",
+            "POST",
+            [pinecone_layer,request_layer],
+            {
+                "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
+                    "PINECONE_INDEX_NAME": "index-name",
+                    "JIRA_SECRET_ARN": jira_secret.secret_arn,
+                    "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
+                    "JIRA_EMAIL" :'grubor.masa@gmail.com',
+                    "JIRA_URL_COMMENTS": 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&fields=comment'
+            }
+        )
+
+        jira_webhook_integration = apigateway.LambdaIntegration(jiraWebHookFunction)
+        self.api.root.add_resource("jiraWebhookHandler").add_method("POST", jira_webhook_integration, authorization_type=apigateway.AuthorizationType.NONE) 
+
+
+
         
