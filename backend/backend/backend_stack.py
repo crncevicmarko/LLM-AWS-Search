@@ -62,6 +62,8 @@ class BackendStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
             description="Layer with dotenv module"
         )
+
+        pinecone_secrets = secretsmanager.Secret.from_secret_name_v2(self, "PineconeSecrets", "PINECONE_DB_SECRETS")
  
 
         def create_lambda_function(id, name, handler, include_dir, method, layers):
@@ -75,6 +77,8 @@ class BackendStack(Stack):
                 memory_size=512,
                 timeout=Duration.seconds(60),     
                 environment={
+                    "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
+                    "PINECONE_INDEX_NAME": "index-name",
                     "JIRA_SECRET_ARN": jira_secret.secret_arn,
                     "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
                     "JIRA_EMAIL" :'grubor.masa@gmail.com',
@@ -97,12 +101,15 @@ class BackendStack(Stack):
 
         self.api.root.add_resource("getTickets").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
 
-        bucket = s3.Bucket(self, "my-bucket",
-                   bucket_name="my-unique-bucket-name12312312311",
-                   removal_policy=RemovalPolicy.DESTROY)
+       
 
 
-        pinecone_secrets = secretsmanager.Secret.from_secret_name_v2(self, "PineconeSecrets", "PINECONE_DB_SECRETS")
+        # bucket = s3.Bucket(self, "my-bucket",
+        #            bucket_name="my-unique-bucket-name12312312311",
+        #            removal_policy=RemovalPolicy.DESTROY)
+
+
+        # pinecone_secrets = secretsmanager.Secret.from_secret_name_v2(self, "PineconeSecrets", "PINECONE_DB_SECRETS")
 
         lambda_role = iam.Role(self, "LambdaBedrockRole",
                                assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
@@ -130,4 +137,20 @@ class BackendStack(Stack):
                                                "PINECONE_INDEX_NAME": "index-name",
                                            },
                                            layers=[pinecone_layer])
+        
+
+        jira_webhook_lambda_function=create_lambda_function(
+            "jiraWebhookHandler",  
+            "jiraWebHookHandlerFunction",  
+            "jira-webhook-handler.lambda_handler",  
+            "backend/jira-webhook-handler",  
+            "POST",  
+            [request_layer,dotenv_layer,pinecone_layer]
+        )
+
+        jira_webhook_handler_integration = apigateway.LambdaIntegration(jira_webhook_lambda_function)  
+
+        self.api.root.add_resource("jiraWebhookHandler").add_method("POST", jira_webhook_handler_integration, authorization_type=apigateway.AuthorizationType.NONE) 
+
+
         
