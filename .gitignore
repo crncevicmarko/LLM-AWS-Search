@@ -20,7 +20,7 @@ package-lock.json
 # Ignore Python cache and virtual environments
 __pycache__/
 .pytest_cache
-.venv
+# .venv
 *.egg-info
 
 # CDK asset staging directory

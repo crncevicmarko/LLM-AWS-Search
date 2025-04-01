@@ -1,7 +1,93 @@
 import json
+import os
+import secrets
 import boto3
+from pinecone import Pinecone
 
 bedrock_client = boto3.client('bedrock-runtime', region_name="eu-west-1")
+
+# Set up Pinecone client 10-23 line
+def get_secret(secret_arn):
+    client = boto3.client("secretsmanager")
+    response = client.get_secret_value(SecretId=secret_arn)
+    secret = json.loads(response["SecretString"])
+    return secret
+
+secret_arn = os.getenv("PINECONE_SECRET_ARN")
+secrets = get_secret(secret_arn)
+
+PINECONE_API_KEY = secrets["apiKey"]
+PINECONE_INDEX_NAME = secrets["indexUrl"]
+
+pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
+index = pc.Index(host=PINECONE_INDEX_NAME)
+
+def parsResponse(query_result: str):
+    results = []
+    for match in query_result.get("matches", []):
+        metadata = match.get("metadata", {})
+
+        if match.get("score") >= 0.25:
+            results.append({
+                "score": match.get("score"),
+                "text": metadata.get("text"),
+                "ticket-url": metadata.get("ticket-url"),
+            })
+    print("Query result: ", results)
+    return results
+
+
+
+# uses bedrock to generate embedding for user input text
+def generate_text_embeding(user_input: str):
+    print("User input: ",user_input)
+    input_text={"inputText":user_input}
+    response=bedrock_client.invoke_model(
+        modelId="amazon.titan-embed-text-v2:0",
+        body=json.dumps(input_text),
+        accept="application/json",
+        contentType="application/json"
+    )   
+    model_output = json.loads(response["body"].read())["embedding"]
+    print("Model output: ",model_output)
+    return model_output
+
+
+def search_pinecone(query_vector):
+    query_result = index.query(
+        vector=query_vector,
+        top_k=3,
+        include_metadata=True,
+        namespace="jira"
+    )
+
+    print("Query result: ", query_result)
+    
+    result = parsResponse(query_result)
+    return result
+
+def generate_response_from_llm(prompt):
+    response = bedrock_client.invoke_model(
+        modelId="amazon.titan-text-lite-v1",
+        body=json.dumps({"inputText": prompt}),
+        accept="application/json",
+        contentType="application/json"
+    )
+    model_output = json.loads(response['body'].read().decode('utf-8'))
+    return model_output.get("results")[0]["outputText"] # list iteriraj
+
+def format_prompt_for_llm(filtered_results):
+    if not filtered_results:
+        return "There are no relevant tickets found for the given query."
+
+    prompt = "Based on the following ticket information, generate a helpful response for the user:\n\n"
+
+    for match in filtered_results.get("response"):
+        prompt += f"- Text: {match.get('text', '')}\n"
+        prompt += f"  Ticket ID: {match.get('ticket-url', 'No ticket-url available')}\n"
+
+    prompt += "Generate a summary of these tickets based on text and display url for every ticket."
+    return prompt
 
 def handler(event, context):
     try:
@@ -14,29 +100,24 @@ def handler(event, context):
                 "statusCode":400,
                 "body":json.dumps({"error":"No message provided"})
             }
+        
+        query_embedding = generate_text_embeding(message)
 
-        input_text={"inputText":message}
+        search_results = search_pinecone(query_embedding)
 
-        response = bedrock_client.invoke_model(
-            modelId="amazon.titan-text-lite-v1",
-            body=json.dumps(input_text),
-            contentType="application/json",
-            accept="application/json"
-        )
-        print("Response: ",str(response['body']))
-        bedrock_response = json.loads(response['body'].read().decode('utf-8'))
-        print("Bedrock Response: ",str(bedrock_response))
-        model_output = bedrock_response.get("results")[0]["outputText"] # ("results") is list, so you need to iterate throught list and return every record not just first elemen(("results")[0])
-        response = {
+        prompt = format_prompt_for_llm(search_results)
+
+        valueToUser = generate_response_from_llm(prompt)
+
+        return {
             "statusCode":200,
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization"
             },
-            "body": json.dumps({"response": model_output})
+            "body": json.dumps({"response": valueToUser})
         }
-        return response
     
     except Exception as e:
         return {
