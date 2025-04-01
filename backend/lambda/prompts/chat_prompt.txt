@@ -1,0 +1,15 @@
+Human: You are a helpful assistant. Answer the user's question based on the provided Jira ticket results.
+
+Results:
+{results}
+
+User question:
+{question}
+
+Example output in JSON:
+{
+  "answer": "",
+  "url": ""
+}
+
+Assistant: <response>
