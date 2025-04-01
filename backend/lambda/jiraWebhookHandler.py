@@ -1,8 +1,6 @@
 import json
 import boto3
-import hashlib
 import os
-from requests.auth import HTTPBasicAuth
 from pinecone import Pinecone
 from models import IssueVector
 
@@ -16,15 +14,13 @@ pinecone_secret_arn = os.getenv("PINECONE_SECRET_ARN")
 secrets = get_secret(pinecone_secret_arn)
 
 PINECONE_API_KEY = secrets["apiKey"]
-PINECONE_INDEX_NAME = secrets["indexUrl"]
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_URL")
 
-# Inicijalizacija Pinecone
 pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
 index = pc.Index(host=PINECONE_INDEX_NAME)
 
 print("Index status : " ,index.describe_index_stats())
 
-# Inicijalizacija AWS Bedrock
 bedrock_runtime = boto3.client("bedrock-runtime")
 
 def generate_embedding(text: str):
@@ -44,8 +40,6 @@ def lambda_handler(event, context):
         issue = body.get("issue")
         comment = body.get("comment")
 
-        #print(f"Received issue: {issue}") 
-
         if not issue:
             return {"statusCode": 400, "body": "Invalid event data - missing issue"}
 
@@ -61,7 +55,6 @@ def lambda_handler(event, context):
         if comment:
             issue_text_sum += " " + comment["body"]
 
-        # text_id = hashlib.md5(issue_text_sum.encode()).hexdigest()
         text_id = issue_id
         print("Id : "+text_id)
         embedding = generate_embedding(issue_text_sum)
