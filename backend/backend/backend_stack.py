@@ -7,7 +7,8 @@ from aws_cdk import (
     Stack,
     aws_s3 as s3,
     aws_lambda as _lambda,
-    aws_iam as iam
+    aws_iam as iam,
+    aws_dynamodb as dynamodb
 )
 
 from constructs import Construct
@@ -16,6 +17,11 @@ class BackendStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        JIRA_URL = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000'
+        JIRA_URL_COMMENTS = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000&fields=comment'
+        JIRA_EMAIL = 'grubor.masa@gmail.com'
+        PINECONE_INDEX_URL = 'https://index-name-cj2bvvd.svc.aped-4627-b74a.pinecone.io'
 
         self.api = apigateway.RestApi(
                 self, 
@@ -75,7 +81,7 @@ class BackendStack(Stack):
             )
             return function
 
-        get_tickets_lambda_function=create_lambda_function(
+        save_issues = create_lambda_function(
             "SaveIssues",  
             "saveIssues.handler",  
             "lambda",  
@@ -83,14 +89,15 @@ class BackendStack(Stack):
             [request_layer, pinecone_layer],
             {
                 "JIRA_SECRET_ARN": jira_secret.secret_arn,
-                "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
-                "JIRA_EMAIL" :'grubor.masa@gmail.com',
-                "JIRA_URL_COMMENTS": 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&fields=comment',
+                "JIRA_URL" : JIRA_URL,
+                "JIRA_EMAIL" : JIRA_EMAIL,
+                "JIRA_URL_COMMENTS": JIRA_URL_COMMENTS,
+                "PINECONE_INDEX_URL": PINECONE_INDEX_URL,
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
             }
         )
 
-        get_tickets_integration = apigateway.LambdaIntegration(get_tickets_lambda_function)  
+        get_tickets_integration = apigateway.LambdaIntegration(save_issues  )  
 
         self.api.root.add_resource("SaveIssues").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
 
@@ -117,17 +124,18 @@ class BackendStack(Stack):
 
         jiraWebHookFunction = create_lambda_function(
             "jiraWebhookFunction",
-            "jiraWebhookHandler.lambda_handler",
+            "jiraWebhookHandler.handler",
             "lambda",
             "POST",
             [pinecone_layer,request_layer],
             {
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
-                    "PINECONE_INDEX_NAME": "index-name",
-                    "JIRA_SECRET_ARN": jira_secret.secret_arn,
-                    "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
-                    "JIRA_EMAIL" :'grubor.masa@gmail.com',
-                    "JIRA_URL_COMMENTS": 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&fields=comment'
+                "PINECONE_INDEX_URL" : PINECONE_INDEX_URL,
+                "PINECONE_INDEX_NAME": "index-name",
+                "JIRA_SECRET_ARN": jira_secret.secret_arn,
+                "JIRA_URL" : JIRA_URL,
+                "JIRA_EMAIL" : JIRA_EMAIL,
+                "JIRA_URL_COMMENTS": JIRA_URL_COMMENTS
             }
         )
 
@@ -136,4 +144,36 @@ class BackendStack(Stack):
 
 
 
-        
+        chat_table = dynamodb.Table(
+            self, "ChatHistory",
+            table_name="ChatHistory",
+            partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
+            sort_key=dynamodb.Attribute(name="timestamp", type=dynamodb.AttributeType.NUMBER),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+        )
+
+        save_message_lambda = create_lambda_function(
+            "SaveChatMessageLambda",
+            "saveChatMessage.handler",
+            "lambda",
+            "POST",
+            [],
+            {
+                "TABLE_NAME": chat_table.table_name
+            }
+
+        )
+
+        get_messages_by_id = create_lambda_function(
+            "getChatLambda",
+            "getMessagesById.handler",
+            "lambda",
+            "POST",
+            [],
+            {
+                "TABLE_NAME": chat_table.table_name
+            }
+
+        )
+        chat_table.grant_write_data(save_message_lambda)
+        chat_table.grant_write_data(get_messages_by_id)
