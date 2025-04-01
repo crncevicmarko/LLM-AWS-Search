@@ -51,11 +51,11 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
 
     return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
-
+  
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
-  resizeInput(inputElement: HTMLInputElement): void {
+  resizeInput(inputElement: HTMLTextAreaElement): void {
     // Reset the height of the input element
     
     inputElement.style.height = 'auto';
