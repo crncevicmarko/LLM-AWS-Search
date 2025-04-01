@@ -1,9 +1,8 @@
 import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { AppService } from '../services/app.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.component';
+
 
 @Component({
   selector: 'app-chatbot',
