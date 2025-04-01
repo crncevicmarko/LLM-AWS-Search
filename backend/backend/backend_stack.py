@@ -109,6 +109,7 @@ class BackendStack(Stack):
             timeout=Duration.seconds(60),
             environment={  
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
+                "PINECONE_INDEX_URL": PINECONE_INDEX_URL
             }
         )
 
@@ -164,8 +165,8 @@ class BackendStack(Stack):
 
 
         chat_table = dynamodb.Table(
-            self, "ChatHistory",
-            table_name="ChatHistory",
+            self,
+            "ChatHistory",
             partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
             sort_key=dynamodb.Attribute(name="timestamp", type=dynamodb.AttributeType.NUMBER),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST

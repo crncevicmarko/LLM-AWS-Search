@@ -31,7 +31,7 @@ def handler(event, context):
         secrets = get_secret(secret_arn)
 
         PINECONE_API_KEY = secrets["apiKey"]
-        PINECONE_INDEX_NAME = secret_arn["indexUrl"]
+        PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_URL")
 
         pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
         index = pc.Index(host=PINECONE_INDEX_NAME)
