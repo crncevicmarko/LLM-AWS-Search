@@ -41,8 +41,9 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
       setTimeout(() => {
         console.log(parsedResponse)
-        const ticketUrl = parsedResponse['ticket-url'] || '';
-        this.botMessages.push(parsedResponse.text+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
+        const ticketUrl = (parsedResponse && parsedResponse['ticket-url']) || '';
+        const ticketText=(parsedResponse && parsedResponse.text || '');
+        this.botMessages.push(ticketText+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });
