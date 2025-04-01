@@ -5,17 +5,20 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
+import { ChatbotComponent } from './chatbot/chatbot.component';
+import { routes } from './app.routes';
 
 @NgModule({
   declarations: [
     AppComponent,
-    MarkdownDisplayComponent  // Declare your components here
+    MarkdownDisplayComponent,
+    ChatbotComponent  // Declare your components here
   ],
   imports: [
     BrowserModule,  // Import essential modules here
     HttpClientModule,  // Import HttpClientModule to enable HTTP requests
     FormsModule,
-    RouterModule
+    RouterModule.forRoot(routes)
   ],
   providers: [],
   bootstrap: [AppComponent]  // Specify your root component
