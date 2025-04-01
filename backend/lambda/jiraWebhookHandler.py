@@ -14,7 +14,7 @@ pinecone_secret_arn = os.getenv("PINECONE_SECRET_ARN")
 secrets = get_secret(pinecone_secret_arn)
 
 PINECONE_API_KEY = secrets["apiKey"]
-PINECONE_INDEX_NAME = secrets["indexUrl"]
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_URL")
 
 pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
 index = pc.Index(host=PINECONE_INDEX_NAME)
