@@ -34,8 +34,6 @@ logger.info("Checking Pinecone index status...")
 index_status = index.describe_index_stats()
 logger.info(f"Index status: {index_status}")
 
-print("Index status : " ,index.describe_index_stats())
-
 bedrock_runtime = boto3.client("bedrock-runtime")
 
 def generate_embedding(text: str):
