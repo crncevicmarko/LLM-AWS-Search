@@ -36,7 +36,6 @@ html{
       color: #EEEEEE;
       font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     }
-    
     /* Chat Box */
     .chat-box {
       margin: 4px 4px 4px 4px;
@@ -67,12 +66,34 @@ html{
       padding-right: 10px;
       padding-bottom: 4px;
     }
-    ai-text,
     .person-text {
       overflow: auto;
       padding: 10px;
       padding-bottom: 4px;
       display: inline-block;
+    }
+    .ai-text {
+      overflow: auto;
+      padding: 10px;
+      padding-bottom: 4px;
+      display: inline-block;
+      font-size: 12px;
+    }
+    .ai-text a {
+      color: #b6dc76;
+      text-decoration: none;
+      font-size: 12px;
+    }
+    
+    .ai-text em {
+      font-weight: bold;
+      font-size: 12px;
+    }
+    
+    .ai-text h1 {
+      font-size: 50px!important; /* Adjust to desired size */
+      margin: 10px 0;  /* Adjust margins if necessary */
+      font-weight: bold; /* Optional: Make it bold if desired */
     }
     
     .ai {
@@ -83,7 +104,9 @@ html{
       color: #b6dc76;
       
     }
-    
+    .h1{
+      font-size: 12px;
+    }
     .ai-block,
     .person-block {
       font-size: 10px;

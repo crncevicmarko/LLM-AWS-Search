@@ -39,9 +39,11 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     this.userInput="";
     // Send the POST request
 
-    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = JSON.parse(res.body);
+    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
       setTimeout(() => {
-        this.botMessages.push(this.mdComp.convertMarkdownToHTML(parsedResponse));
+        console.log(parsedResponse)
+        const ticketUrl = parsedResponse['ticket-url'] || '';
+        this.botMessages.push(parsedResponse.text+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });

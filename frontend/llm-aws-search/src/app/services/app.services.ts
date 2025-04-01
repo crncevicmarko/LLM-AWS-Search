@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Injectable } from "@angular/core";
+import { Injectable, Query } from "@angular/core";
 import { environment } from '../../enviroments/enviroment';
 
 @Injectable({
@@ -10,7 +10,13 @@ export class AppService{
     constructor(private http: HttpClient) { }
     apiHost: string=environment.apiUrl;
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json'})
-    recieveUserInput(text: any): Observable<any>{
-        return this.http.post<any>(this.apiHost+ '/test-chatbot',text, {headers: this.headers})
+    recieveUserInput(query: any): Observable<any>{
+      console.log(query);
+      const messageContent = query.message;
+      const userMessage = {
+        text: messageContent
+      };
+      
+        return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
     }
     }
