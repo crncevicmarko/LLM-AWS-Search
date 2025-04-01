@@ -11,7 +11,7 @@ import { MarkdownDisplayComponent } from './markdown-display/markdown-display.co
   standalone:false,
   
 })
-export class AppComponent implements AfterViewChecked{
+export class AppComponent{/*
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -72,5 +72,5 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     if (chatBoxElement) {
       chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
     }
-  }
+  }*/
 }
