@@ -49,7 +49,6 @@ def generate_text_embeding(user_input: str):
         contentType="application/json"
     )   
     model_output = json.loads(response["body"].read())["embedding"]
-    print("Model output: ",model_output)
     return model_output
 
 
@@ -74,19 +73,30 @@ def generate_response_from_llm(prompt):
         contentType="application/json"
     )
     model_output = json.loads(response['body'].read().decode('utf-8'))
+    print("Model output1: ", model_output)
+    print("Model output2: ", model_output.get("results")[0]["outputText"])
     return model_output.get("results")[0]["outputText"] # list iteriraj
 
 def format_prompt_for_llm(filtered_results):
+    print("Entered format_prompt_for_llm")
+    
     if not filtered_results:
         return "There are no relevant tickets found for the given query."
+    print("After filtered_results")
 
-    prompt = "Based on the following ticket information, generate a helpful response for the user:\n\n"
-
-    for match in filtered_results.get("response"):
-        prompt += f"- Text: {match.get('text', '')}\n"
-        prompt += f"  Ticket ID: {match.get('ticket-url', 'No ticket-url available')}\n"
-
-    prompt += "Generate a summary of these tickets based on text and display url for every ticket."
+    prompt = "Based on the following ticket information, generate a helpful response for the user and display the url for every ticket information:\n\n"
+    print("After prompt")
+    for match in filtered_results:
+        title = match.get('text', 'No Title Available')
+        description = match.get('description', 'No Description Available')
+        url = match.get('ticket-url', 'No ticket URL available')
+        
+        prompt += f"**Ticket Title:** {title}\n"
+        prompt += f"**Description:** {description}\n"
+        prompt += f"**Ticket URL:** {url}\n\n"
+    print("After for loop")
+    prompt += "Make the structured response where are you going to return the Ticket Title, summarized Description and URL to that ticket that you are describing"
+    print("After prompt +=")
     return prompt
 
 def handler(event, context):
@@ -104,10 +114,13 @@ def handler(event, context):
         query_embedding = generate_text_embeding(message)
 
         search_results = search_pinecone(query_embedding)
+        print("Search results: ", search_results)
 
-        prompt = format_prompt_for_llm(search_results)
+        # prompt = format_prompt_for_llm(search_results)
+        # print("Prompt: ", prompt)
 
-        valueToUser = generate_response_from_llm(prompt)
+        # valueToUser = generate_response_from_llm(prompt)
+        # print("Value to user: ", valueToUser)
 
         return {
             "statusCode":200,
@@ -116,7 +129,7 @@ def handler(event, context):
                 "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization"
             },
-            "body": json.dumps({"response": valueToUser})
+            "body": json.dumps({"response": search_results})
         }
     
     except Exception as e:
