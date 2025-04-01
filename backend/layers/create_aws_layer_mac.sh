@@ -37,11 +37,11 @@ do
     continue
   fi
 
-  # For PowerShell, use Compress-Archive to create the zip file
-  # PowerShell command to compress the folder (this would require running the script in PowerShell)
-  powershell Compress-Archive -Path "$PACKAGE_DIR" -DestinationPath "$ZIP_FILE"
+  # Use the zip command to create the zip file on macOS
+  echo "Creating zip file for $package..."
+  zip -r "$ZIP_FILE" "$PACKAGE_DIR" > /dev/null
 
-  # Check if the zip was successful (in PowerShell, you can check the $?) 
+  # Check if the zip was successful
   if [ $? -eq 0 ]; then
     echo "$package Lambda layer package $ZIP_FILE created successfully."
   else
