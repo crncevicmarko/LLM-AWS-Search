@@ -3,10 +3,12 @@ html{
     padding: 0%;
   }
   body {
-      margin: -8px!important; 
+   
       font-family: sans-serif;
       -ms-overflow-style: scrollbar;
       background-color: #222831;
+      width: 100%;
+      height: 100%;
     }
     
     main {
