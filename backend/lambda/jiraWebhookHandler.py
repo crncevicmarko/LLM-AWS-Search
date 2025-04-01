@@ -1,29 +1,26 @@
 import json
 import boto3
-import hashlib
 import os
-from requests.auth import HTTPBasicAuth
 from pinecone import Pinecone
-
-# from models import IssueVector
+from models import IssueVector
 
 def get_secret(secret_arn):
     client = boto3.client("secretsmanager")
     response = client.get_secret_value(SecretId=secret_arn)
     return json.loads(response["SecretString"])
 
-# Dohvatanje tajni
+# 
 pinecone_secret_arn = os.getenv("PINECONE_SECRET_ARN")
 secrets = get_secret(pinecone_secret_arn)
 
 PINECONE_API_KEY = secrets["apiKey"]
-PINECONE_INDEX_NAME = secrets["indexUrl"]
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_URL")
 
-# Inicijalizacija Pinecone
 pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
 index = pc.Index(host=PINECONE_INDEX_NAME)
 
-# Inicijalizacija AWS Bedrock
+print("Index status : " ,index.describe_index_stats())
+
 bedrock_runtime = boto3.client("bedrock-runtime")
 
 def generate_embedding(text: str):
@@ -36,6 +33,7 @@ def generate_embedding(text: str):
     return json.loads(response["body"].read())["embedding"]
 
 def lambda_handler(event, context):
+   
     try:
         body = json.loads(event["body"])
         event_type = body.get("webhookEvent")
@@ -57,17 +55,21 @@ def lambda_handler(event, context):
         if comment:
             issue_text_sum += " " + comment["body"]
 
-        text_id = hashlib.md5(issue_text_sum.encode()).hexdigest()
+        text_id = issue_id
         print("Id : "+text_id)
         embedding = generate_embedding(issue_text_sum)
 
         issue_vector = IssueVector(text_id, embedding, issue_text_sum, base_url + issue_key)
 
-        if event_type in ["issue_created", "issue_updated", "comment_added"]:
+        print("Event type : ",event_type)
+
+        if event_type in ["jira:issue_created", "jira:issue_updated", "jira:comment_added"]:
+            print(f"Upserting vector with ID: {text_id}")
             index.upsert(vectors=[issue_vector.to_dict()], namespace="jira")
+            print(f"Vector {text_id} inserted successfully")
             return {"statusCode": 200, "body": json.dumps({"message": "Ticket processed", "issue_id": issue_id})}
 
-        elif event_type in ["issue_deleted", "comment_deleted"]:
+        elif event_type in ["jira:issue_deleted", "jira:comment_deleted"]:
             index.delete(ids=[text_id], namespace="jira")
             return {"statusCode": 200, "body": json.dumps({"message": "Ticket deleted", "issue_id": issue_id})}
 
@@ -76,21 +78,3 @@ def lambda_handler(event, context):
     except Exception as e:
         return {"statusCode": 500, "body": json.dumps(f"Error occurred: {str(e)}")}
     
-from typing import List, Dict
-
-class IssueVector:
-    def init(self, text_id: str, embedding: List[float], text: str, url: str):
-        self.id = text_id
-        self.values = embedding
-        self.metadata = {
-            "text": text,
-            "length": len(text),
-            "ticket-url": url
-        }
-
-    def to_dict(self) -> Dict:
-        return {
-            "id": self.id,
-            "values": self.values,
-            "metadata": self.metadata
-        }

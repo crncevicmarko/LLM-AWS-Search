@@ -157,7 +157,7 @@ body {
     resize: none;
     transition: height 0.2s ease-in-out;
     box-sizing: border-box;
-    
+   
   }
 
   ::ng-deep .mat-mdc-form-field-infix {
@@ -224,8 +224,7 @@ body {
     color: #7a7675; 
     padding-top: 10px;
   }
-  
-  
+ 
   /* Mobile Responsive Design */
   @media screen and (max-width: 480px) {
     .chat-box p {

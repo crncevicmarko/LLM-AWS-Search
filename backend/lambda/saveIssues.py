@@ -1,11 +1,9 @@
 import json
 import boto3
-import hashlib
 import requests
 from requests.auth import HTTPBasicAuth
 import os
 from pinecone import Pinecone
-
 from models import IssueVector
 
 def get_secret(secret_arn):
@@ -19,7 +17,7 @@ secret_arn = os.getenv("PINECONE_SECRET_ARN")
 secrets = get_secret(secret_arn)
 
 PINECONE_API_KEY = secrets["apiKey"]
-PINECONE_INDEX_NAME = secrets["indexUrl"]
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_URL")
 
 pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
 index = pc.Index(host=PINECONE_INDEX_NAME)
@@ -95,7 +93,7 @@ def format_and_insert_issues(issues_data, comments_data):
 
             issue_text_sum += " " + comment.get("body")
 
-        text_id = f"{hashlib.md5(issue_text_sum.encode()).hexdigest()}"
+        text_id = issue_id
         embedding = generate_text_embedding(issue_text_sum)
 
         issue_vector = IssueVector(text_id, embedding, issue_text_sum, base_url + issue["key"] )
