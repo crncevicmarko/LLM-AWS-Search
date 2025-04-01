@@ -23,6 +23,7 @@ class BackendStack(Stack):
         JIRA_EMAIL = 'grubor.masa@gmail.com'
         PINECONE_INDEX_URL = 'https://index-name-cj2bvvd.svc.aped-4627-b74a.pinecone.io'
 
+        
         self.api = apigateway.RestApi(
                 self, 
                 "AIChatbotJiraAPI",
@@ -97,9 +98,27 @@ class BackendStack(Stack):
             }
         )
 
+        get_user_input_lambda_func = _lambda.Function(
+            self, "TestLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            layers=[pinecone_layer],
+            handler="retreveUserInput.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            role=lambda_role,
+            memory_size=512, 
+            timeout=Duration.seconds(60),
+            environment={  
+                "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
+            }
+        )
+
         get_tickets_integration = apigateway.LambdaIntegration(save_issues  )  
+        get_user_input_integration = apigateway.LambdaIntegration(get_user_input_lambda_func)
+
 
         self.api.root.add_resource("SaveIssues").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
+        get_user_input = self.api.root.add_resource("test-chatbot")
+        get_user_input.add_method("POST", get_user_input_integration, authorization_type=apigateway.AuthorizationType.NONE)
 
         lambda_role = iam.Role(self, "LambdaBedrockRole",
                                assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
