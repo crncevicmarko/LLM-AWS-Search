@@ -24,7 +24,7 @@ app = cdk.App()
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
     # )
-BackendStack(app, "RetreveUserInputStack")
+BackendStack(app, "RegistartionLogInStack")
 
 
 app.synth()
