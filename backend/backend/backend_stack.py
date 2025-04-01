@@ -16,7 +16,7 @@ class BackendStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
+        
         self.api = apigateway.RestApi(
                 self, 
                 "AIChatbotJiraAPI",
@@ -90,9 +90,27 @@ class BackendStack(Stack):
             }
         )
 
+        get_user_input_lambda_func = _lambda.Function(
+            self, "TestLambdaFunction",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            layers=[pinecone_layer],
+            handler="retreveUserInput.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            role=lambda_role,
+            memory_size=512, 
+            timeout=Duration.seconds(60),
+            environment={  
+                "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
+            }
+        )
+
         get_tickets_integration = apigateway.LambdaIntegration(get_tickets_lambda_function)  
+        get_user_input_integration = apigateway.LambdaIntegration(get_user_input_lambda_func)
+
 
         self.api.root.add_resource("SaveIssues").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
+        get_user_input = self.api.root.add_resource("test-chatbot")
+        get_user_input.add_method("POST", get_user_input_integration, authorization_type=apigateway.AuthorizationType.NONE)
 
         lambda_role = iam.Role(self, "LambdaBedrockRole",
                                assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
