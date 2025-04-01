@@ -11,7 +11,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def get_secret(secret_arn):
-    logger.info(f"Fetching secrets from Secrets Manager: {secret_arn}")
     try:
         client = boto3.client("secretsmanager")
         response = client.get_secret_value(SecretId=secret_arn)
@@ -32,6 +31,9 @@ PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_URL")
 pc = Pinecone(api_key=PINECONE_API_KEY, environment="us-east-1")
 index = pc.Index(host=PINECONE_INDEX_NAME)
 
+logger.info("Checking Pinecone index status...")
+index_status = index.describe_index_stats()
+logger.info(f"Index status: {index_status}")
 
 def generate_text_embedding(text: str):
     logger.info("Generating text embedding...")
