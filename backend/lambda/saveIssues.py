@@ -95,7 +95,8 @@ def format_and_insert_issues(issues_data, comments_data):
 
             issue_text_sum += " " + comment.get("body")
 
-        text_id = f"{hashlib.md5(issue_text_sum.encode()).hexdigest()}"
+        # text_id = f"{hashlib.md5(issue_text_sum.encode()).hexdigest()}"
+        text_id = issue_id
         embedding = generate_text_embedding(issue_text_sum)
 
         issue_vector = IssueVector(text_id, embedding, issue_text_sum, base_url + issue["key"] )

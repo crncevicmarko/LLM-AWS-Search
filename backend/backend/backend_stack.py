@@ -16,18 +16,20 @@ class BackendStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
-
-        self.api = apigateway.RestApi(self, "AIChatbotJiraAPI",
-                                    rest_api_name="AI Chatbot Jira API",
-                                    description="API for an AI chatbot retrieving data from Jira..",
-                                    endpoint_types=[apigateway.EndpointType.REGIONAL], 
-                                    default_cors_preflight_options={
-                                        "allow_origins": apigateway.Cors.ALL_ORIGINS,
-                                        "allow_methods": apigateway.Cors.ALL_METHODS, 
-                                        "allow_headers": ["*"],
-                                        "allow_credentials": True
-                                    }
-                                    )
+        
+        self.api = apigateway.RestApi(
+                self, 
+                "AIChatbotJiraAPI",
+                rest_api_name="AI Chatbot Jira API",
+                description="API for an AI chatbot retrieving data from Jira.",
+                endpoint_types=[apigateway.EndpointType.REGIONAL], 
+                default_cors_preflight_options={
+                    "allow_origins": apigateway.Cors.ALL_ORIGINS,  
+                    "allow_methods": apigateway.Cors.ALL_METHODS,  
+                    "allow_headers": ["*"],  
+                    "allow_credentials": True  
+                }
+                )
         
         
         lambda_role = iam.Role(self, "LambdaRole",
@@ -115,7 +117,8 @@ class BackendStack(Stack):
                                managed_policies=[
                                    iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
                                    iam.ManagedPolicy.from_aws_managed_policy_name("AmazonS3ReadOnlyAccess"),
-                                   iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess")
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess"),
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("SecretsManagerReadWrite") 
                                ])
         
         setPineconeDB = create_lambda_function(
@@ -128,4 +131,27 @@ class BackendStack(Stack):
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
             }
         )
+
+
+        jiraWebHookFunction = create_lambda_function(
+            "jiraWebhookFunction",
+            "jiraWebhookHandler.lambda_handler",
+            "lambda",
+            "POST",
+            [pinecone_layer,request_layer],
+            {
+                "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
+                    "PINECONE_INDEX_NAME": "index-name",
+                    "JIRA_SECRET_ARN": jira_secret.secret_arn,
+                    "JIRA_URL" :'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM',
+                    "JIRA_EMAIL" :'grubor.masa@gmail.com',
+                    "JIRA_URL_COMMENTS": 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&fields=comment'
+            }
+        )
+
+        jira_webhook_integration = apigateway.LambdaIntegration(jiraWebHookFunction)
+        self.api.root.add_resource("jiraWebhookHandler").add_method("POST", jira_webhook_integration, authorization_type=apigateway.AuthorizationType.NONE) 
+
+
+
         
