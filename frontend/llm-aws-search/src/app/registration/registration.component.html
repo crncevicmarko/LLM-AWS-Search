@@ -4,7 +4,7 @@
     
     <form [formGroup]="createRegisterForm" class="example-container" (ngSubmit)="register()">
 
-    <mat-form-field class="other-fields">
+    <mat-form-field [ngClass]="['first-field', 'other-fields']">
         <mat-label>Enter your name</mat-label>
         <input matInput name="name" placeholder="First Name" formControlName="name"   required>
      </mat-form-field>
@@ -15,7 +15,7 @@
     </mat-form-field>
 
       
-    <mat-form-field aclass="other-fields">
+    <mat-form-field class="other-fields">
         <input matInput placeholder="Username (Email)"  name="username" formControlName="username" required>
         <mat-icon matSuffix>email</mat-icon>
     </mat-form-field>
@@ -41,7 +41,7 @@
     </form>
 
       <div class="example-button-row">
-        <button (click)="register()" id="button" mat-raised-button color="primary" [disabled]="!createRegisterForm.valid">
+        <button (click)="register()" id="button" mat-raised-button [disabled]="!createRegisterForm.valid">
           Register
           <mat-icon class="icon">how_to_reg</mat-icon>
         </button>
@@ -55,5 +55,10 @@
 <div *ngIf="!isFormValid" class="error-message">
   Input data are not valid!
 </div>
+
+</div>
+
+
+
   
   
