@@ -1,7 +1,8 @@
 import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core';
-import { AppService } from '../services/app.services';
+import { ChatService } from '../services/chatbot.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.component';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 
 @Component({
@@ -22,7 +23,7 @@ userMessages:string [] = [];  // Array to store the chat messages
 botMessages:string[]=[];
 time:string=new Date().toLocaleTimeString();
 htmlContent:string="";
-constructor(private appService: AppService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent) { }
+constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent,private sidebarComponent:SidebarComponent) { }
 
   // Function to handle form submission
   onSubmit() {
@@ -38,9 +39,8 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     this.userInput="";
     // Send the POST request
 
-    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
+    this.chatService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
       setTimeout(() => {
-        console.log(parsedResponse)
         const ticketUrl = (parsedResponse && parsedResponse['ticket-url']) || '';
         const ticketText=(parsedResponse && parsedResponse.text || '');
         this.botMessages.push(ticketText+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
