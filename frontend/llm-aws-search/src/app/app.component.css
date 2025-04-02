@@ -1,0 +1,37 @@
+/* Make the layout container use flexbox */
+.layout-container {
+    display: flex;
+    height: 100vh; /* Ensure the layout takes the full height of the screen */
+  }
+  
+  /* Sidebar styles to be fixed on the left */
+  app-sidebar {
+    width: 250px; /* Sidebar width */
+    height: 100vh; /* Full height */
+    position: fixed; /* Fixed sidebar */
+    top: 0;
+    left: 0;
+    background-color: #333;
+    color: white;
+    z-index: 100; /* Ensure sidebar is above content */
+  }
+  
+  /* Main content styles */
+  .main-content {
+    margin-left: 250px; /* This should match the sidebar's width */
+    overflow-y: auto;
+    flex-grow: 1; /* This makes the content flexible */
+    background-color: #f4f4f4; /* Optional: background for the main content */
+  }
+  
+  /* For smaller screens (responsive design) */
+  @media screen and (max-width: 768px) {
+    app-sidebar {
+      width: 200px; /* Adjust sidebar width */
+    }
+  
+    .main-content {
+      margin-left: 200px; /* Adjust content margin to match the new sidebar width */
+    }
+  }
+  

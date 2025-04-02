@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AppService } from './services/app.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

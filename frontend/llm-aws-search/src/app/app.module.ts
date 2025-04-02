@@ -12,12 +12,15 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SidebarComponent } from './sidebar/sidebar.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MarkdownDisplayComponent,
-    ChatbotComponent  // Declare your components here
+    ChatbotComponent,  // Declare your components here
+    SidebarComponent,
+    
   ],
   imports: [
     BrowserModule,  // Import essential modules here

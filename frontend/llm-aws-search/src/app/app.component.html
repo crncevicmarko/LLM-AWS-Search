@@ -1,1 +1,9 @@
-<router-outlet></router-outlet>
+<!-- Layout component with sidebar -->
+<div class="layout-container">
+    <app-sidebar></app-sidebar>  <!-- Sidebar component -->
+    
+    <div class="main-content">
+      <router-outlet></router-outlet> <!-- Routed content will be displayed here -->
+    </div>
+  </div>
+  
