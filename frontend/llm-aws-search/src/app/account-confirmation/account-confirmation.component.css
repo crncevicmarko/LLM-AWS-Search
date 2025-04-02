@@ -1,0 +1,79 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+  }
+  
+  h2 {
+    color: #007bff;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  
+  form {
+    width: 250px; 
+    margin-top: 30px;
+  }
+  
+  .mat-form-field {
+    width: 100%;
+    margin-bottom: 15px; 
+  }
+  
+  .mat-raised-button {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .usernameField {
+    width: 250px; 
+  }
+  
+  .example-button-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+   
+  }
+  .mat-raised-button {
+    width: 100%;
+    margin-top: 20px;
+    margin-left: 30px;
+  }
+  .icon {
+    margin-left: 3px;
+  }
+  
+  .container mat-form-field + mat-form-field {
+    margin-left: 8px;
+  }
+  
+  .example-right-align {
+    text-align: right;
+  }
+  
+  input.example-right-align::-webkit-outer-spin-button,
+  input.example-right-align::-webkit-inner-spin-button {
+    display: none;
+  }
+  
+  input.example-right-align {
+    -moz-appearance: textfield;
+  }
+  
+  .registration-section {
+    display: flex;
+    align-items: center;
+    margin-top: 3%;
+  }
+  
+  label {
+    margin-right: 1%; 
+  }
+  .dugme{
+    margin-left: 20px;
+  }

@@ -1,0 +1,11 @@
+<div class="container">
+    <h2>Account Confirmation</h2>
+    <form [formGroup]="confirmationForm" (ngSubmit)="confirmAccount()">
+      <mat-form-field appearance="outline">
+        <mat-label>Confirmation Code</mat-label>
+        <input matInput formControlName="confirmationCode">
+      </mat-form-field>
+      <button class="dugme" mat-raised-button color="primary" type="submit" [disabled]="!confirmationForm.valid">Confirm Account</button>
+    </form>
+</div>
+  

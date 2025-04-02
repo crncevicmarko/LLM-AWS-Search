@@ -13,11 +13,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+          
             "outputPath": "dist/llm-aws-search",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "src/app/polyfills.ts"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [

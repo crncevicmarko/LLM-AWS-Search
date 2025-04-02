@@ -1,0 +1,59 @@
+
+<div class="example-container">
+    <h2 class="register-header">Register</h2>
+    
+    <form [formGroup]="createRegisterForm" class="example-container" (ngSubmit)="register()">
+
+    <mat-form-field class="other-fields">
+        <mat-label>Enter your name</mat-label>
+        <input matInput name="name" placeholder="First Name" formControlName="name"   required>
+     </mat-form-field>
+
+    <mat-form-field class="other-fields">
+        <mat-label>Enter your surname</mat-label>
+        <input matInput name="surname" placeholder="Last Name"  formControlName="surname" required>
+    </mat-form-field>
+
+      
+    <mat-form-field aclass="other-fields">
+        <input matInput placeholder="Username (Email)"  name="username" formControlName="username" required>
+        <mat-icon matSuffix>email</mat-icon>
+    </mat-form-field>
+
+
+    <mat-form-field class="other-fields">
+        <mat-label>Enter your password</mat-label>
+        <input matInput name="password" [type]="hide ? 'password' : 'text'" formControlName="password" required>
+        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide.toString()">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <mat-form-field class="other-fields">
+        <mat-label>Confirm your password</mat-label>
+        <input matInput [type]="hide ? 'password' : 'text'" formControlName="confirmPassword" name="confirmPassword" required>
+        <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide.toString()">
+          <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+
+  
+    </form>
+
+      <div class="example-button-row">
+        <button (click)="register()" id="button" mat-raised-button color="primary" [disabled]="!createRegisterForm.valid">
+          Register
+          <mat-icon class="icon">how_to_reg</mat-icon>
+        </button>
+      </div>
+
+      
+<div *ngIf="createRegisterForm.hasError('passwordMismatch')" class="error-message">
+  Passwords do not match.
+</div>
+
+<div *ngIf="!isFormValid" class="error-message">
+  Input data are not valid!
+</div>
+  
+  
