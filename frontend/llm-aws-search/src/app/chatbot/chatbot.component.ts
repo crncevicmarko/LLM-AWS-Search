@@ -1,17 +1,18 @@
 import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { AppService } from './services/app.services';
+import { AppService } from '../services/app.services';
 import { ChangeDetectorRef } from '@angular/core';
-import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
+import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.component';
+
+
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+  selector: 'app-chatbot',
+  templateUrl: './chatbot.component.html',
+  styleUrl: './chatbot.component.css',
   standalone:false,
-  
 })
-export class AppComponent{/*
+export class ChatbotComponent {
+  
+
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -37,9 +38,12 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     this.userInput="";
     // Send the POST request
 
-    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = JSON.parse(res.body);
+    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
       setTimeout(() => {
-        this.botMessages.push(this.mdComp.convertMarkdownToHTML(parsedResponse));
+        console.log(parsedResponse)
+        const ticketUrl = (parsedResponse && parsedResponse['ticket-url']) || '';
+        const ticketText=(parsedResponse && parsedResponse.text || '');
+        this.botMessages.push(ticketText+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });
@@ -50,11 +54,11 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
 
     return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
-
+  
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
-  resizeInput(inputElement: HTMLInputElement): void {
+  resizeInput(inputElement: HTMLTextAreaElement): void {
     // Reset the height of the input element
     
     inputElement.style.height = 'auto';
@@ -72,5 +76,5 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     if (chatBoxElement) {
       chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
     }
-  }*/
+  }
 }
