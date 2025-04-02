@@ -1,0 +1,46 @@
+.example-container mat-form-field + mat-form-field {
+    margin-left: 8px;
+  }
+
+  .example-container {
+    display: flex;
+    margin-top: 30px;
+    flex-direction: column;
+    align-items: center;
+  }
+ 
+  .mat-form-field {
+    width: 300px;
+    margin-bottom: 16px; 
+  }
+  .other-fields{
+    width: 250px;
+  }
+
+  .register-header {
+    color: #007bff; 
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  .example-button-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px; 
+  }
+
+  .slide-toggle-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    gap: 10px; 
+    margin-left: 100px;
+    margin-bottom: 20px;
+  }
+
+  .error-message {
+    color: red;
+    margin-top: 15px;
+  }
+  
