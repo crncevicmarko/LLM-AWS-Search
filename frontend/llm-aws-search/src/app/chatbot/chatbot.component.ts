@@ -38,12 +38,10 @@ constructor(private appService: AppService,private cdRef: ChangeDetectorRef,priv
     this.userInput="";
     // Send the POST request
 
-    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
+    this.appService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response;
       setTimeout(() => {
-        console.log(parsedResponse)
-        const ticketUrl = (parsedResponse && parsedResponse['ticket-url']) || '';
-        const ticketText=(parsedResponse && parsedResponse.text || '');
-        this.botMessages.push(ticketText+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
+        console.log(res);
+        this.botMessages.push(this.mdComp.convertMarkdownToHTML(parsedResponse));
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });
