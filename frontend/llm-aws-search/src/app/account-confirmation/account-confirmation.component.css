@@ -1,0 +1,116 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: first baseline;
+  height: 100vh;
+  background-color: #25273D;
+}
+
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 30px;
+    background-color: #1E1E2E;
+    padding: 40px;
+    border-radius: 15px;
+  }
+
+  .container form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 40px; /* Moves everything to the right */
+  }
+  
+  h2 {
+    color: #fc0bd3;
+    font-size: 28px;
+    margin-bottom: 10px;
+  }
+  
+  form {
+    width: 250px; 
+    margin-top: 30px;
+  }
+  
+  .mat-form-field {
+    width: 100%;
+    margin-bottom: 15px; 
+  }
+  
+  .mat-raised-button {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .usernameField {
+    width: 250px; 
+  }
+  
+  .example-button-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+   
+  }
+  .mat-raised-button {
+    width: 100%;
+    margin-top: 20px;
+    margin-left: 30px;
+  }
+  .icon {
+    margin-left: 3px;
+  }
+  
+  .container mat-form-field + mat-form-field {
+    margin-left: 8px;
+  }
+  
+  .example-right-align {
+    text-align: right;
+  }
+  
+  input.example-right-align::-webkit-outer-spin-button,
+  input.example-right-align::-webkit-inner-spin-button {
+    display: none;
+  }
+  
+  input.example-right-align {
+      appearance: none; /* Standard */
+      -webkit-appearance: none; /* Chrome, Safari */
+      -moz-appearance: textfield; /* Firefox */
+  }
+  
+  .registration-section {
+    display: flex;
+    align-items: center;
+    margin-top: 3%;
+  }
+  
+  label {
+    margin-right: 1%; 
+  }
+  .dugme{
+    margin-left: 20px;
+    
+  }
+
+  #button{
+    color: #fc0bd3;
+    background-color: #25273D;
+    border: 2px solid #fc0bd3;
+
+  }
+
+  #button:disabled {
+    background-color: #25273D !important; 
+    color: #fc0bd3 !important; 
+    cursor: not-allowed;  
+    opacity: 0.6; 
+  }
+

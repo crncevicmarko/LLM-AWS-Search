@@ -36,8 +36,6 @@ def parsResponse(query_result: str):
     print("Query result: ", results)
     return results
 
-
-
 # uses bedrock to generate embedding for user input text
 def generate_text_embeding(user_input: str):
     print("User input: ",user_input)
@@ -50,6 +48,16 @@ def generate_text_embeding(user_input: str):
     )   
     model_output = json.loads(response["body"].read())["embedding"]
     return model_output
+
+def loadTheTxt(filter_results, user_question):
+    with open("prompts/chat_prompt.txt", "r") as txt_file:
+        template = txt_file.read()  # Read file content
+
+    formatted_prompt = template.format(results=filter_results, question=user_question)
+
+    print("Txt File: ", formatted_prompt)
+
+    return formatted_prompt 
 
 
 def search_pinecone(query_vector):
@@ -66,38 +74,76 @@ def search_pinecone(query_vector):
     return result
 
 def generate_response_from_llm(prompt):
+    print("Entered generate_response_from_llm1: ", prompt)
     response = bedrock_client.invoke_model(
-        modelId="amazon.titan-text-lite-v1",
-        body=json.dumps({"inputText": prompt}),
+        modelId="anthropic.claude-3-haiku-20240307-v1:0",
+        body=json.dumps(
+            {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": 1000,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": prompt
+                            }
+                        ]
+                    }
+                ]
+            }
+        ),
         accept="application/json",
         contentType="application/json"
     )
+    print("Response1: ", response)
     model_output = json.loads(response['body'].read().decode('utf-8'))
     print("Model output1: ", model_output)
-    print("Model output2: ", model_output.get("results")[0]["outputText"])
-    return model_output.get("results")[0]["outputText"] # list iteriraj
+    print("Model output2: ", model_output.get('content')[0].get('text'))
+    return model_output.get('content')[0].get('text')
 
-def format_prompt_for_llm(filtered_results):
-    print("Entered format_prompt_for_llm")
-    
+def format_prompt_for_llm(filtered_results, user_question):
+    print("Entered format_prompt_for_llm", filtered_results)
+
     if not filtered_results:
         return "There are no relevant tickets found for the given query."
-    print("After filtered_results")
 
-    prompt = "Based on the following ticket information, generate a helpful response for the user and display the url for every ticket information:\n\n"
-    print("After prompt")
+    formatted_results = []
     for match in filtered_results:
-        title = match.get('text', 'No Title Available')
-        description = match.get('description', 'No Description Available')
-        url = match.get('ticket-url', 'No ticket URL available')
-        
-        prompt += f"**Ticket Title:** {title}\n"
-        prompt += f"**Description:** {description}\n"
-        prompt += f"**Ticket URL:** {url}\n\n"
-    print("After for loop")
-    prompt += "Make the structured response where are you going to return the Ticket Title, summarized Description and URL to that ticket that you are describing"
-    print("After prompt +=")
+        title = match.get("text", "No Title Available")
+        description = match.get("description", "No Description Available")
+        url = match.get("ticket-url", "No ticket URL available")
+
+        formatted_results.append(
+            f"- **Ticket Title**: {title}\n"
+            f"  **Description**: {description}\n"
+            f"  **URL**: {url}"
+        )
+
+    results_str = "\n".join(formatted_results)
+
+    prompt = (
+        f"Human: You are a helpful and enthusiastic assistant who provides clear, structured, and detailed answers. "
+        f"Based on the provided Jira ticket results, answer the user's question in an engaging and caring way. "
+        f"Results: {results_str} "
+        f"User question: {user_question} "
+        f"Format the response like this:\n"
+        f"- Start with a friendly introduction, showing enthusiasm and care for the user's request.\n"
+        f"- List each relevant Jira ticket with:\n"
+        f"  - Ticket Title\n"
+        f"  - Descriptio(A summary of description of the ticket's purpose and tasks)\n"
+        f"  - A URL to the ticket (this is the most important part and **must always be included**).\n"
+        f"- Conclude with a warm, thoughtful closing statement that reassures the user, encourages further questions, and expresses eagerness to help. Example:\n"
+        f"  'I hope this helps! If you need more details or have any follow-up questions, feel free to ask. I'm always here to assist you in navigating Jira and finding the right information. Let me know how I can help further!'"
+        f"\nEnsure the response is structured, informative, and engaging. **Every ticket must have a valid URL.**\n"
+        f"Assistant:"
+    )
+
+
     return prompt
+
+
 
 def handler(event, context):
     try:
@@ -116,11 +162,14 @@ def handler(event, context):
         search_results = search_pinecone(query_embedding)
         print("Search results: ", search_results)
 
-        # prompt = format_prompt_for_llm(search_results)
-        # print("Prompt: ", prompt)
+        prompt = format_prompt_for_llm(search_results, message)
+        print("Prompt2: ", prompt)
 
-        # valueToUser = generate_response_from_llm(prompt)
-        # print("Value to user: ", valueToUser)
+        valueToUser = ""
+        if not prompt or "there are no relevant tickets found for the given query" in prompt.lower():
+            valueToUser = "There are no relevant tickets for the given request."
+        else:
+            valueToUser = generate_response_from_llm(prompt)
 
         return {
             "statusCode":200,
@@ -129,7 +178,7 @@ def handler(event, context):
                 "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization"
             },
-            "body": json.dumps({"response": search_results})
+            "body": json.dumps({"response": valueToUser})
         }
     
     except Exception as e:

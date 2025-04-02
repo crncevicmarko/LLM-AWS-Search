@@ -1,0 +1,70 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #25273D;
+}
+
+.example-container mat-form-field + mat-form-field {
+    margin-left: 8px;
+    
+  }
+
+  .example-container {
+    display: flex;
+    margin-top: 30px;
+    flex-direction: column;
+    align-items: center;
+    background-color: #1E1E2E;
+    padding: 20px 20px 20px 20px;
+    border-radius: 15px;
+  }
+ 
+  .mat-form-field {
+    width: 300px;
+    margin-bottom: 16px; 
+    
+  }
+  .other-fields{
+    width: 250px;
+    
+  }
+
+  .first-field{
+    margin-left: 6px;
+  }
+
+  .register-header {
+    color: #fc0bd3; 
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  .example-button-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px; 
+  }
+
+  .slide-toggle-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    gap: 10px; 
+    margin-left: 100px;
+    margin-bottom: 20px;
+  }
+
+  .error-message {
+    color: #a00786;
+    margin-top: 15px;
+  }
+
+  #button{
+    background-color: #1E1E2E;
+    color: #fc0bd3;
+    border: 2px solid #fc0bd3;
+  }
+  
