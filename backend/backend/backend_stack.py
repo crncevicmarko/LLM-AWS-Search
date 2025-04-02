@@ -186,7 +186,7 @@ class BackendStack(Stack):
 
         get_messages_by_id = create_lambda_function(
             "getChatLambda",
-            "getMessagesById.handler",
+            "getMessagesByChatId.handler",
             "lambda",
             "POST",
             [],
@@ -196,4 +196,4 @@ class BackendStack(Stack):
 
         )
         chat_table.grant_write_data(save_message_lambda)
-        chat_table.grant_write_data(get_messages_by_id)
+        chat_table.grant_read_data(get_messages_by_id)
