@@ -39,11 +39,10 @@ constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,pr
     this.userInput="";
     // Send the POST request
 
-    this.chatService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response[0];
+    this.chatService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response;
       setTimeout(() => {
-        const ticketUrl = (parsedResponse && parsedResponse['ticket-url']) || '';
-        const ticketText=(parsedResponse && parsedResponse.text || '');
-        this.botMessages.push(ticketText+"\n LINK TO TICKET:"+this.mdComp.convertMarkdownToHTML(ticketUrl));
+        console.log(res);
+        this.botMessages.push(this.mdComp.convertMarkdownToHTML(parsedResponse));
         this.thinking = false; // Enable button after delay
       }, 1000); // Adjust the delay as needed
     });
