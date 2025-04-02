@@ -2,7 +2,6 @@ import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core'
 import { ChatService } from '../services/chatbot.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.component';
-import { SidebarComponent } from '../sidebar/sidebar.component';
 
 
 @Component({
@@ -23,7 +22,7 @@ userMessages:string [] = [];  // Array to store the chat messages
 botMessages:string[]=[];
 time:string=new Date().toLocaleTimeString();
 htmlContent:string="";
-constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent,private sidebarComponent:SidebarComponent) { }
+constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent) { }
 
   // Function to handle form submission
   onSubmit() {
