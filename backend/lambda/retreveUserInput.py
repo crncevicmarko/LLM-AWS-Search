@@ -132,7 +132,7 @@ def format_prompt_for_llm(filtered_results, user_question):
         f"- Start with a friendly introduction, showing enthusiasm and care for the user's request.\n"
         f"- List each relevant Jira ticket with:\n"
         f"  - Ticket Title\n"
-        f"  - A detailed description of the ticket's purpose and tasks\n"
+        f"  - Descriptio(A summary of description of the ticket's purpose and tasks)\n"
         f"  - A URL to the ticket (this is the most important part and **must always be included**).\n"
         f"- Conclude with a warm, thoughtful closing statement that reassures the user, encourages further questions, and expresses eagerness to help. Example:\n"
         f"  'I hope this helps! If you need more details or have any follow-up questions, feel free to ask. I'm always here to assist you in navigating Jira and finding the right information. Let me know how I can help further!'"
