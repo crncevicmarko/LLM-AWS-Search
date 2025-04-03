@@ -6,7 +6,7 @@ import os
 from pinecone import Pinecone
 from models import IssueVector
 
-def get_secret(secret_arn):
+def get_secret(secret_arn):   
     client = boto3.client("secretsmanager")
     response = client.get_secret_value(SecretId=secret_arn)
     secret = json.loads(response["SecretString"])
@@ -45,30 +45,36 @@ def handler(event, context):
     auth = HTTPBasicAuth(JIRA_EMAIL, JIRA_API_TOKEN)
   
     try:
+        startAt = 0
+        response = requests.get(f"{JIRA_URL}startAt={startAt}", auth=auth)
 
-        response = requests.get(JIRA_URL, auth=auth)
-        response_with_comments = requests.get(JIRA_URL_COMMENTS, auth=auth)
+        while len(response.json().get('issues')) != 0:
 
-        if response.status_code == 200 and response_with_comments.status_code == 200:
-            format_and_insert_issues(response.json(), response_with_comments.json())
+            response_with_comments = requests.get(JIRA_URL_COMMENTS, auth=auth)
 
-            return {
-                'statusCode': 200,
-                'body': json.dumps({"message": "Data inserted into Pinecone"})
-            }
-        else:
-            if response.status_code == 200:
-                print(f"Error fetching tickets comments: {response_with_comments.status_code}")
-                return {
-                    'statusCode': response_with_comments.status_code,
-                    'body': json.dumps('Error fetching tickets comments from JIRA.')
-                }
+            if response.status_code == 200 and response_with_comments.status_code == 200:
+                format_and_insert_issues(response.json(), response_with_comments.json())
             else:
-                print(f"Error fetching tickets: {response.status_code}")
-                return {
-                    'statusCode': response.status_code,
-                    'body': json.dumps('Error fetching tickets from JIRA.')
-                }
+                if response.status_code == 200:
+                    print(f"Error fetching tickets comments: {response_with_comments.status_code}")
+                    return {
+                        'statusCode': response_with_comments.status_code,
+                        'body': json.dumps('Error fetching tickets comments from JIRA.')
+                    }
+                else:
+                    print(f"Error fetching tickets: {response.status_code}")
+                    return {
+                        'statusCode': response.status_code,
+                        'body': json.dumps('Error fetching tickets from JIRA.')
+                    }
+            startAt += 100
+            response = requests.get(f"{JIRA_URL}startAt={startAt}", auth=auth)
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps({"message": "Data inserted into Pinecone"})
+            }
+       
 
     except Exception as e:
         print(f"Exception occurred: {str(e)}")
@@ -81,16 +87,24 @@ def format_and_insert_issues(issues_data, comments_data):
     base_url = "https://jiralevi9internship2025.atlassian.net/browse/"
     comments_mapping = { issue["id"]: issue["fields"]["comment"]["comments"] for issue in comments_data.get("issues", [])}     
 
+    issues = []
+    subtasks = []
     for issue in issues_data.get("issues", []):
-
         fields = issue.get("fields", {})
+        
+        if fields['issuetype']['subtask']:
+            continue
+
         issue_id = issue.get("id")
-        issue_text_sum = f"{fields.get('summary', '')}\n{fields.get('description', '')}{issue.get('key')} creator: {fields.get('creator', {}).get('displayName', '')}"
+        issue_text_sum = f"{issue.get('key')} - {fields.get('summary', '')}\n{fields.get('description', '')} creator: {fields.get('creator', {}).get('displayName', '')}"
+        
+        if fields['subtasks']: issue_text_sum += ', subtasks: '
+        for subtask in fields['subtasks']:
+            issue_text_sum += f" {subtask['key']} - {subtask['fields']['summary']},"
 
         comments = comments_mapping.get(issue_id, [])
-
+        if comments: issue_text_sum += ", comments: "
         for comment in comments:
-
             issue_text_sum += " " + comment.get("body")
 
         text_id = issue_id
@@ -98,3 +112,5 @@ def format_and_insert_issues(issues_data, comments_data):
 
         issue_vector = IssueVector(text_id, embedding, issue_text_sum, base_url + issue["key"] )
         index.upsert(vectors=[issue_vector.to_dict()], namespace="jira")
+
+    return subtasks

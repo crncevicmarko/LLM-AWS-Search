@@ -19,6 +19,7 @@ class BackendStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        JIRA_URL_BASE = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&'
         JIRA_URL = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000'
         JIRA_URL_COMMENTS = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000&fields=comment'
         JIRA_EMAIL = 'grubor.masa@gmail.com'
@@ -156,7 +157,7 @@ class BackendStack(Stack):
             [request_layer, pinecone_layer],
             {
                 "JIRA_SECRET_ARN": jira_secret.secret_arn,
-                "JIRA_URL" : JIRA_URL,
+                "JIRA_URL" : JIRA_URL_BASE,
                 "JIRA_EMAIL" : JIRA_EMAIL,
                 "JIRA_URL_COMMENTS": JIRA_URL_COMMENTS,
                 "PINECONE_INDEX_URL": PINECONE_INDEX_URL,
@@ -262,7 +263,7 @@ class BackendStack(Stack):
             "getChatLambda",
             "getMessagesByChatId.handler",
             "lambda",
-            "POST",
+            "GET",
             [],
             {
                 "TABLE_NAME": chat_table.table_name
@@ -271,3 +272,13 @@ class BackendStack(Stack):
         )
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
+
+        save_message_resource = apigateway.root.add_resource("save-message")
+        save_message_resource.add_method(
+            "POST", apigateway.LambdaIntegration(save_message_lambda)
+        )
+
+        get_messages_resource = apigateway.root.add_resource("get-messages")
+        get_messages_resource.add_method(
+            "GET", apigateway.LambdaIntegration(get_messages_by_id)
+        )
