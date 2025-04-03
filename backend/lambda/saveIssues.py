@@ -96,7 +96,7 @@ def format_and_insert_issues(issues_data, comments_data):
             continue
 
         issue_id = issue.get("id")
-        issue_text_sum = f"{issue.get('key')} - {fields.get('summary', '')}\n{fields.get('description', '')} creator: {fields.get('creator', {}).get('displayName', '')}"
+        issue_text_sum = f"ID: {issue.get('key')} {fields.get('summary', '')}\n{fields.get('description', '')} creator: {fields.get('creator', {}).get('displayName', '')}"
         
         if fields['subtasks']: issue_text_sum += ', subtasks: '
         for subtask in fields['subtasks']:
@@ -110,7 +110,10 @@ def format_and_insert_issues(issues_data, comments_data):
         text_id = issue_id
         embedding = generate_text_embedding(issue_text_sum)
 
-        issue_vector = IssueVector(text_id, embedding, issue_text_sum, base_url + issue["key"] )
+        issue_vector = IssueVector(text_id, embedding, issue.get('key'), issue_text_sum, fields.get('creator', {}).get('displayName', ''), base_url + issue["key"] )
+
+        issue_vector.set_embedding(embedding=embedding)
+
         index.upsert(vectors=[issue_vector.to_dict()], namespace="jira")
 
     return subtasks

@@ -273,12 +273,17 @@ class BackendStack(Stack):
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
 
-        save_message_resource = apigateway.root.add_resource("save-message")
-        save_message_resource.add_method(
-            "POST", apigateway.LambdaIntegration(save_message_lambda)
-        )
+        save_message_integration = apigateway.LambdaIntegration(save_message_lambda)
+        self.api.root.add_resource("save-message").add_method("POST", save_message_integration, authorization_type=apigateway.AuthorizationType.NONE) 
 
-        get_messages_resource = apigateway.root.add_resource("get-messages")
-        get_messages_resource.add_method(
-            "GET", apigateway.LambdaIntegration(get_messages_by_id)
-        )
+        get_messages_integration = apigateway.LambdaIntegration(get_messages_by_id)
+        self.api.root.add_resource("get-messages").add_method("GET", get_messages_integration, authorization_type=apigateway.AuthorizationType.NONE) 
+        # save_message_resource = apigateway.LambdaIntegration("save-message")
+        # save_message_resource.add_method(
+        #     "POST", apigateway.LambdaIntegration(save_message_lambda)
+        # )
+
+        # get_messages_resource = apigateway.root.add_resource("get-messages")
+        # get_messages_resource.add_method(
+        #     "GET", apigateway.LambdaIntegration(get_messages_by_id)
+        # )

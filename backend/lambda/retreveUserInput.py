@@ -60,11 +60,21 @@ def loadTheTxt(filter_results, user_question):
     return formatted_prompt 
 
 
-def search_pinecone(query_vector):
+def search_pinecone(query_vector, params):
+    ticket_id = params.get('id', None)
+    creator_name = params.get('creator', None)
+
+    filter_conditions = {}
+    if ticket_id:
+        filter_conditions["id"] = {"$eq": ticket_id}
+    if creator_name:
+        filter_conditions["creator"] = {"$eq": creator_name}
+
     query_result = index.query(
         vector=query_vector,
         top_k=3,
         include_metadata=True,
+        filter=filter_conditions if filter_conditions else None, 
         namespace="jira"
     )
 
@@ -102,6 +112,20 @@ def generate_response_from_llm(prompt):
     print("Model output1: ", model_output)
     print("Model output2: ", model_output.get('content')[0].get('text'))
     return model_output.get('content')[0].get('text')
+
+def format_prompt_for_pinecone(user_question):
+    prompt = (f"Extract specific information from the following text. If the text contains any mention of a creator (such as 'creator', 'created by', 'author', or similar terms), extract the name following that mention and assign it to the 'creator' field in a JSON object."
+    f"If the text includes an ID in the format 'SCRUM-' followed by a number (e.g., SCRUM-12), extract it and assign it to the 'id' field."
+    f"If neither of these values is found, return an empty JSON."
+    f"Input text: {user_question}"
+    f"Output Format: The output **must** be **valid JSON only**, without any additional text."
+    """{
+    "creator": '<extracted_creator_name>',
+    "id": '<extracted_id>'
+    }"""
+    "If no relevant information is found, return: {} and if only one relevant information is found return only one"
+    )
+    return prompt
 
 def format_prompt_for_llm(filtered_results, user_question):
     print("Entered format_prompt_for_llm", filtered_results)
@@ -159,7 +183,12 @@ def handler(event, context):
         
         query_embedding = generate_text_embeding(message)
 
-        search_results = search_pinecone(query_embedding)
+        prompt_for_pinecone = format_prompt_for_pinecone(message)
+        search_params = generate_response_from_llm(prompt_for_pinecone)
+
+        # print(f"Search params: {search_params}")
+
+        search_results = search_pinecone(query_embedding, json.loads(search_params))
         print("Search results: ", search_results)
 
         prompt = format_prompt_for_llm(search_results, message)
