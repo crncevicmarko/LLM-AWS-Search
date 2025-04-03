@@ -1,9 +1,10 @@
 import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AppService } from './services/app.services';
+import { ChatService } from './services/chatbot.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
