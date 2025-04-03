@@ -17,48 +17,38 @@ def get_secret(secret_arn):
 
 def generate_response_from_llm(prompt):
     try:
-        # Create the payload based on the required structure
-        body = {
-            "modelId": "amazon.nova-micro-v1:0",
-            "contentType": "application/json",
-            "accept": "application/json",
-            "body": {
-                "inferenceConfig": {
-                    "max_new_tokens": 50  # Set max tokens as desired
-                },
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            }
+       
+        request_body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 50,  # Adjust as needed
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}]  # Haiku requires "type" and "text"
+                }
+            ]
         }
 
-        # Make the API request to invoke the model
         response = bedrock_client.invoke_model(
-            modelId=body["modelId"],
-            body=json.dumps(body["body"]),  # Send the body content as JSON
-            accept=body["accept"],
-            contentType=body["contentType"]
+            modelId="anthropic.claude-3-haiku-20240307-v1:0",  # Haiku model ID
+            body=json.dumps(request_body),
+            accept="application/json",
+            contentType="application/json"
         )
 
-        # Parse the model's response
         response_body = json.loads(response['body'].read().decode('utf-8'))
-
-        # Check if the response contains choices and extract the message content
-        if 'choices' in response_body:
-            choices = response_body['choices']
-            if choices:
-                return choices[0].get('text', 'No response')
-        return 'No choices in response'
+        
+        # Extract response from Haiku's structure
+        if 'content' in response_body:
+            return response_body['content'][0]['text'].strip()
+        return "No response generated"
 
     except Exception as e:
         return f"Error generating response: {str(e)}"
 
 def generate_title(prompt):
-    """Generate a concise title for the conversation."""
-    title_prompt = f"Generate a short and relevant title for this conversation:\n\n{prompt}"
+   
+    title_prompt = f"Generate a short and relevant title based on this question. Don't answer the question just give me back the title with fewest words possible:\n\n{prompt}"
     title = generate_response_from_llm(title_prompt)
     return title.strip()  # Strip any unnecessary whitespace
 
