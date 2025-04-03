@@ -40,7 +40,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     MatSelectModule,
     MatSlideToggleModule,
     CommonModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatIconModule
   ],
   exports: [
     MatToolbarModule,
@@ -64,7 +65,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
     MatSelectModule,
     MatSlideToggleModule,
     CommonModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatIconModule
   ]
 })
 export class MaterialModule { }

@@ -3,6 +3,7 @@ import { ChatbotComponent } from './chatbot/chatbot.component';
 import { AppComponent } from './app.component';
 import { AccountConfirmationComponent } from './account-confirmation/account-confirmation.component';
 import { RegistrationComponent } from './registration/registration.component';
+import { LoginComponent } from './login/login.component';
 
 export const routes: Routes = [
   // Redirect the root route ("/") to the chat route ("/chat")
@@ -17,5 +18,6 @@ export const routes: Routes = [
   //{ path: '**', redirectTo: '/chat' },  // Redirect unknown routes to /chat
 
   {component:AccountConfirmationComponent,path:"verifyAccount/:username"},
-  {path:'register',component:RegistrationComponent}
+  {path:'register',component:RegistrationComponent},
+  {path:'login',component:LoginComponent}
 ];

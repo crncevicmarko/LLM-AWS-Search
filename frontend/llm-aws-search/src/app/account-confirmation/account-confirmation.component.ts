@@ -68,7 +68,6 @@ export class AccountConfirmationComponent implements OnInit {
       } else {
         console.log('Account confirmed successfully:', result);
         this.snackBar.open('Account confirmed successfully.', 'Close', { duration: 3000 });
-        // Možete dodati redirekciju na stranicu nakon uspešne potvrde naloga
       }
     });
   }
