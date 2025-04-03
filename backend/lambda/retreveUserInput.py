@@ -33,12 +33,10 @@ def parsResponse(query_result: str):
                 "text": metadata.get("text"),
                 "ticket-url": metadata.get("ticket-url"),
             })
-    print("Query result: ", results)
     return results
 
 # uses bedrock to generate embedding for user input text
 def generate_text_embeding(user_input: str):
-    print("User input: ",user_input)
     input_text={"inputText":user_input}
     response=bedrock_client.invoke_model(
         modelId="amazon.titan-embed-text-v2:0",
@@ -55,8 +53,6 @@ def loadTheTxt(filter_results, user_question):
 
     formatted_prompt = template.format(results=filter_results, question=user_question)
 
-    print("Txt File: ", formatted_prompt)
-
     return formatted_prompt 
 
 
@@ -67,20 +63,17 @@ def search_pinecone(query_vector):
         include_metadata=True,
         namespace="jira"
     )
-
-    print("Query result: ", query_result)
     
     result = parsResponse(query_result)
     return result
 
 def generate_response_from_llm(prompt):
-    print("Entered generate_response_from_llm1: ", prompt)
     response = bedrock_client.invoke_model(
         modelId="anthropic.claude-3-haiku-20240307-v1:0",
         body=json.dumps(
             {
                 "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 1000,
+                "max_tokens": 1500,
                 "messages": [
                     {
                         "role": "user",
@@ -97,17 +90,19 @@ def generate_response_from_llm(prompt):
         accept="application/json",
         contentType="application/json"
     )
-    print("Response1: ", response)
     model_output = json.loads(response['body'].read().decode('utf-8'))
-    print("Model output1: ", model_output)
-    print("Model output2: ", model_output.get('content')[0].get('text'))
     return model_output.get('content')[0].get('text')
 
-def format_prompt_for_llm(filtered_results, user_question):
-    print("Entered format_prompt_for_llm", filtered_results)
-
+def format_prompt_for_llm(filtered_results, user_question, chat_history):
     if not filtered_results:
-        return "There are no relevant tickets found for the given query."
+        # If no tickets are found, provide a useful alternative response
+        return (
+            f"Previous conversation: {chat_history}\n\n"
+            f"The user asked: {user_question}. "
+            f"Provide a **concise and relevant** response using key insights. "
+            f"Offer guidance or suggest possible actions in 2-3 sentences max.\n\n"
+            f"Assistant:"
+        )
 
     formatted_results = []
     for match in filtered_results:
@@ -116,18 +111,21 @@ def format_prompt_for_llm(filtered_results, user_question):
         url = match.get("ticket-url", "No ticket URL available")
 
         formatted_results.append(
-            f"- **Ticket Title**: {title}\n"
-            f"  **Description**: {description}\n"
-            f"  **URL**: {url}"
+            f"- **{title}**\n{description}\n({url})"
         )
 
-    results_str = "\n".join(formatted_results)
+    jira_ticket_results = "\n".join(formatted_results)
 
-    prompt = (
-        f"Human: You are a helpful and enthusiastic assistant who provides clear, structured, and detailed answers. "
-        f"Based on the provided Jira ticket results, answer the user's question in an engaging and caring way. "
-        f"Results: {results_str} "
-        f"User question: {user_question} "
+    return (
+        f"Previous conversation: {chat_history}\n\n"
+        f"The user asked: {user_question}. "
+        f"Here is relevant information from the Jira tickets:\n\n"
+        f"{jira_ticket_results}\n\n"
+        f"Answer the question directly based on the ticket information. "
+        f"Do **not** infer or provide additional details outside of the ticket descriptions. "
+        f"Stick strictly to the content provided in the Jira tickets."
+        f"Keep the response factual and concise.\n\n"
+        f"Detect the language of the user's question and respond in the same language, ensuring that all parts of the response match the user's language. "
         f"Format the response like this:\n"
         f"- Start with a friendly introduction, showing enthusiasm and care for the user's request.\n"
         f"- List each relevant Jira ticket with:\n"
@@ -136,34 +134,46 @@ def format_prompt_for_llm(filtered_results, user_question):
         f"  - A URL to the ticket (this is the most important part and **must always be included**).\n"
         f"- Conclude with a warm, thoughtful closing statement that reassures the user, encourages further questions, and expresses eagerness to help. Example:\n"
         f"  'I hope this helps! If you need more details or have any follow-up questions, feel free to ask. I'm always here to assist you in navigating Jira and finding the right information. Let me know how I can help further!'"
-        f"\nEnsure the response is structured, informative, and engaging. **Every ticket must have a valid URL.**\n"
+        f"\nEnsure the response is structured, informative, and engaging. Every ticket must have a valid URL.\n"
         f"Assistant:"
     )
 
+def process_chat_history(chat_history):
+    """Keep the first 4 messages and summarize the rest if there are more."""
+    
+    if len(chat_history) > 4:
+        first_four_messages = "\n".join(chat_history[:4])
+        older_messages = "\n".join(chat_history[4:])
 
-    return prompt
+        summary_prompt = (
+            f"Summarize the following chat history while keeping key details:\n\n{older_messages}"
+        )
+        summarized_history = generate_response_from_llm(summary_prompt)
 
-
+        return first_four_messages + "\n" + summarized_history
+    else:
+        return "\n".join(chat_history)
 
 def handler(event, context):
     try:
         body = json.loads(event.get("body","{}"))
-        message = body.get("text", "")
-        print("Message: ", message)
+        chat_history = body.get("chat_history", "")
+        user_input = body.get("user_input", "")
 
-        if not message:
+        if not user_input:
             return{
                 "statusCode":400,
-                "body":json.dumps({"error":"No message provided"})
+                "body":json.dumps({"error":"No user input provided"})
             }
         
-        query_embedding = generate_text_embeding(message)
+        chat_history = process_chat_history(chat_history)
+
+        
+        query_embedding = generate_text_embeding(chat_history + user_input)
 
         search_results = search_pinecone(query_embedding)
-        print("Search results: ", search_results)
 
-        prompt = format_prompt_for_llm(search_results, message)
-        print("Prompt2: ", prompt)
+        prompt = format_prompt_for_llm(search_results, user_input, chat_history)
 
         valueToUser = ""
         if not prompt or "there are no relevant tickets found for the given query" in prompt.lower():
