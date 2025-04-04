@@ -20,9 +20,10 @@ def generate_response_from_llm(prompt):
        
         request_body = {
             "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 10,  # Adjust as needed
+            "max_tokens": 20,  # Adjust as needed
             "system" : "You are a title generator for a Jira chat bot. Create a 3-5 word title for the user's input. Do NOT answer the question. "
-            "Most of the questions will be about Jira tickets so do not include that part in the title.",
+            "Most of the questions will be about Jira tickets so do not include that part in the title. "
+            "Do not apply any text styling just return plain text. Start each title with an uppercase letter",
             "messages": [
                 {
                     "role": "user",
