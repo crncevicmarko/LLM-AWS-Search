@@ -246,6 +246,12 @@ class BackendStack(Stack):
             sort_key=dynamodb.Attribute(name="timestamp", type=dynamodb.AttributeType.NUMBER),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
         )
+        chat_titles = dynamodb.Table(
+            self,
+            "ChatTitles",
+            partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+        )
 
         save_message_lambda = create_lambda_function(
             "SaveChatMessageLambda",
@@ -273,12 +279,34 @@ class BackendStack(Stack):
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
 
-        # save_message_resource = apigateway.root.add_resource("save-message")
-        # save_message_resource.add_method(
-        #     "POST", apigateway.LambdaIntegration(save_message_lambda)
-        # )
+        chat_table.grant_write_data(save_message_lambda)
 
-        # get_messages_resource = apigateway.root.add_resource("get-messages")
-        # get_messages_resource.add_method(
-        #     "GET", apigateway.LambdaIntegration(get_messages_by_id)
-        # )
+        save_message_resource = self.api.root.add_resource("save-message")
+        save_message_resource.add_method(
+            "POST", apigateway.LambdaIntegration(save_message_lambda)
+        )
+
+        get_messages_resource = self.api.root.add_resource("get-messages")
+        get_messages_resource.add_method(
+            "GET", apigateway.LambdaIntegration(get_messages_by_id)
+        )
+        title_generation_lambda = _lambda.Function(
+            self, "TitleGenerationLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="generateTitle.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            memory_size=512,
+            timeout=Duration.seconds(60),
+            environment={
+                "TABLE_NAME": chat_titles.table_name  # Use the correct table here
+            }
+        )
+
+        # Grant DynamoDB write access to the Lambda
+        chat_titles.grant_write_data(title_generation_lambda)
+
+        # Create the API Gateway resource for generating titles
+        title_generation_integration = apigateway.LambdaIntegration(title_generation_lambda)
+
+        # Create a POST endpoint to trigger the title generation
+        self.api.root.add_resource("generate-title").add_method("POST", title_generation_integration)
