@@ -126,37 +126,29 @@ body {
     width: 100%;
   }
   
- 
-  .chat-input-field {
-    min-width: 100% !important;
-    margin-right: 10px;  
-    display: flex;
-    font-size: 20px;
-  }
-  
   .chat-input {
-    height: 40px;
-    min-height: 40px; 
-    max-height: 150px; 
-    display: block;
-    overflow-x: hidden;
-    flex-grow: 1;
-    padding: 2px 2px 2px 2px;
-    margin: 0 4px 0 4px;
-    font-size: 20px;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    border: 0;
-    background-color: #1E1E2E;
-    border-radius: 15px;
-    color: white;
-    opacity: 0.8;
-    width: 100% !important;
-    line-height: 1.5;
-    resize: none;
-    transition: height 0.2s ease-in-out;
-    box-sizing: border-box;
-   
-  }
+  align-content: center;
+  display: flex;
+  height: 40px;
+  /* min-height: 40px; 
+  max-height: 150px;  */
+  overflow-x: hidden;
+  /* flex-grow: 1; */
+  padding: 2px 2px 2px 2px;
+  margin: 2px 0px 2px 0px;
+  font-size: 20px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  border: 0;
+  background-color: #1E1E2E;
+  border-radius: 15px;
+  color: white;
+  opacity: 0.8;
+  width: 100% !important;
+  line-height: 1.5;
+  resize: none;
+  transition: height 0.2s ease-in-out;
+  box-sizing: border-box;
+}
 
   ::ng-deep .mat-mdc-form-field-infix {
     padding: 0 !important; 
