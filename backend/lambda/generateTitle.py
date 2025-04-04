@@ -20,7 +20,9 @@ def generate_response_from_llm(prompt):
        
         request_body = {
             "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 50,  # Adjust as needed
+            "max_tokens": 10,  # Adjust as needed
+            "system" : "You are a title generator for a Jira chat bot. Create a 3-5 word title for the user's input. Do NOT answer the question. "
+            "Most of the questions will be about Jira tickets so do not include that part in the title.",
             "messages": [
                 {
                     "role": "user",
@@ -48,7 +50,7 @@ def generate_response_from_llm(prompt):
 
 def generate_title(prompt):
    
-    title_prompt = f"Generate a short and relevant title based on this question. Don't answer the question just give me back the title with fewest words possible:\n\n{prompt}"
+    title_prompt = f"Generate a short and relevant title based on this question.\n{prompt}"
     title = generate_response_from_llm(title_prompt)
     return title.strip()  # Strip any unnecessary whitespace
 
@@ -57,7 +59,7 @@ def handler(event, context):
     try:
         body = json.loads(event.get("body", ""))
 
-        valueToUser=generate_response_from_llm(body.get('text'))
+        valueToUser=generate_title(body.get('text'))
 
         return {
             "statusCode": 200,
