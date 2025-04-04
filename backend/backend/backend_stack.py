@@ -13,6 +13,7 @@ from aws_cdk import (
 )
 
 from constructs import Construct
+import shutil
 
 class BackendStack(Stack):
 
@@ -69,6 +70,25 @@ class BackendStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
         )
 
+        langchain_layer = _lambda.LayerVersion(
+            self, "LangchainLayer",
+            code=_lambda.Code.from_asset("layers/langchain.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
+        # pydantic_layer = _lambda.LayerVersion(
+        #     self, "PydanticLayer",
+        #     code=_lambda.Code.from_asset("layers/pydanticlayer.zip"),
+        #     compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        # )
+
+        # pydantic_core_layer = _lambda.LayerVersion(
+        #     self, "PydanticCoreLayer",
+        #     code=_lambda.Code.from_asset("layers/pydantic_core.zip"),
+        #     compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        # )
+
+
         
         user_pool = cognito.UserPool(
             self, "JiraUserPool",
@@ -107,6 +127,11 @@ class BackendStack(Stack):
         #     self, "JiraCognitoAuthorizer",
         #     cognito_user_pools=[user_pool]
         # )
+
+        # mt_authorizer_lambda_archive = shutil.make_archive(
+        #                                              "lambda/retreveUserInput.py",
+        #                                              "zip",
+        #                                              "output/retreveUserInput.zip")
 
 
  
@@ -168,9 +193,9 @@ class BackendStack(Stack):
         get_user_input_lambda_func = _lambda.Function(
             self, "TestLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_9,
-            layers=[pinecone_layer],
             handler="retreveUserInput.handler",
-            code=_lambda.Code.from_asset("lambda"),
+            layers=[pinecone_layer,langchain_layer],
+            code=_lambda.Code.from_asset("lambda/output/retreveUserInput.zip"),
             role=lambda_role,
             memory_size=512, 
             timeout=Duration.seconds(60),

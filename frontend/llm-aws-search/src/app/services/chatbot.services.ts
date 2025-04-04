@@ -16,8 +16,9 @@ export class ChatService{
       const userMessage = {
         text: messageContent
       };
-      
-        return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
+
+        // return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
+        return this.http.post<any>('https://i57eufjva2.execute-api.eu-west-1.amazonaws.com/prod/test-chatbot',userMessage, {headers: this.headers})
     }
     getAllChats(userId:any): Chat[] {
       const chats:Chat[] = [
