@@ -310,3 +310,27 @@ class BackendStack(Stack):
 
         # Create a POST endpoint to trigger the title generation
         self.api.root.add_resource("generate-title").add_method("POST", title_generation_integration)
+
+        # Assuming `get_title_by_id` is the function that handles fetching chat titles
+        get_title_by_id_lambda = create_lambda_function(
+            "GetTitleByIdLambda",
+            "getChatTitles.handler",  # Lambda handler
+            "lambda",  # Lambda code directory
+            "GET",  # HTTP method
+            [],  # Layers (if any)
+            {
+                "TABLE_NAME": chat_titles.table_name  # Environment variable for DynamoDB table
+            }
+        )
+
+        # Grant read access to the Lambda function for the DynamoDB table
+        chat_titles.grant_read_data(get_title_by_id_lambda)
+
+        # Create the API Gateway integration
+        get_title_integration = apigateway.LambdaIntegration(get_title_by_id_lambda)
+
+        # Add the resource and method to API Gateway
+        self.api.root.add_resource("get-title").add_method("GET", get_title_integration)
+
+
+
