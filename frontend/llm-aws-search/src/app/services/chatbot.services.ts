@@ -40,5 +40,11 @@ export class ChatService{
       console.log(chats);
       return chats;
     }
+    setChatName(text:string):Observable<any>{
+      return this.http.post<any>(this.apiHost+ '/generate-title',text, {headers: this.headers})
+    }
+    getChatName(chat_id:any):Observable<any>{
+      return this.http.get<any>(this.apiHost+ '/get-title?chat_id='+chat_id, {headers: this.headers})
+    }
 
     }
