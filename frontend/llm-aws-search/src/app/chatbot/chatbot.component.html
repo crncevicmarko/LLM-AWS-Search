@@ -1,0 +1,52 @@
+<body>
+  <main id="main" style="margin: 0;">
+    <div class="chat-box-container">
+      <h1 class="chat-box-header">tixie.</h1>
+      <div class="chat-box" #chatBox>
+        <div *ngFor="let umessage of userMessages; let i = index" class="ai-person-container">
+          <div class="person-block">
+            <p class="time-style">{{ time }}</p>
+            <p class="person">You: </p>
+            <p class="person-text">{{ umessage }}</p>
+          </div>
+          <div class="ai-block">
+            <p class="time-style">{{ time }}</p>
+            <p class="ai">ChatBot: </p>
+            <p class="ai-text" [innerHTML]="botMessages[i]"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form class="chat-form" (ngSubmit)="onSubmit()" #chatForm="ngForm">
+      <mat-form-field class="chat-form-field" subscriptSizing="dynamic">
+        <textarea 
+          matInput
+          #chatInput
+          [(ngModel)]="userInput"
+          name="input"
+          class="chat-input"
+          placeholder="Type something..."
+          required
+          matAutosize
+          (input)="resizeInput(chatInput)"
+          (keydown.enter)="onSubmit()"
+        ></textarea>
+      </mat-form-field>
+      
+      <button
+        class="chat-submit"
+        type="submit"
+        name="submit"
+        [disabled]="!chatForm.valid || thinking || !userInput.trim()"
+      >
+        <span *ngIf="!thinking">
+          <i class="fas fa-paper-plane"></i>
+        </span>
+        <span *ngIf="thinking">
+          <i class="fas fa-spinner fa-spin"></i>
+        </span>
+      </button>
+    </form>
+  </main>
+</body>

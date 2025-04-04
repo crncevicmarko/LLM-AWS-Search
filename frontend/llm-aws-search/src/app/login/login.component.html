@@ -1,0 +1,42 @@
+<html>
+  <body>
+<div class="login-container">
+    <h2 class="login-header">Log In</h2>
+      <form [formGroup]='loginForm' (ngSubmit)="login()">
+    <div class="login-form" fxLayout="column" fxLayoutAlign="center center">
+      <p fxFlex>
+        <mat-form-field appearance="fill" fxFlex="100%" class="usernameField" >
+          <mat-label>Username</mat-label>
+          <input matInput class="username" id="loginUsername" placeholder="Username" formControlName="username"  required #usernameInput>
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field fxFlex="100%">
+            <mat-label>Enter your password</mat-label>
+            <input matInput  class="pass" id="loginPassword" [type]="hide ? 'password' : 'text'" required  formControlName="password" #passwordInput>
+            <button mat-icon-button matSuffix (click)="hide = !hide" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hide.toString()">
+              <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+          </mat-form-field>
+      </p>
+    </div>
+  </form>
+  
+    <div class="example-button-row">
+      <button class="button" (click)="login()"  mat-raised-button >
+        Log in
+        <mat-icon class="icon">vpn_key</mat-icon>
+      </button>
+    </div>
+    <div class="registration-section">
+      <label class="label-question">Not registered yet?</label>
+      <button mat-raised-button class="button" (click)="register()">
+        Register
+      </button>
+    </div>
+    
+  </div>
+
+</body>
+</html>
+  

@@ -8,6 +8,7 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_lambda as _lambda,
     aws_iam as iam,
+    aws_cognito as cognito,
     aws_dynamodb as dynamodb
 )
 
@@ -18,6 +19,7 @@ class BackendStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        JIRA_URL_BASE = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=100&'
         JIRA_URL = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000'
         JIRA_URL_COMMENTS = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000&fields=comment'
         JIRA_EMAIL = 'grubor.masa@gmail.com'
@@ -66,6 +68,47 @@ class BackendStack(Stack):
             code=_lambda.Code.from_asset("layers/pinecone.zip"),
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
         )
+
+        
+        user_pool = cognito.UserPool(
+            self, "JiraUserPool",
+            user_pool_name="JIraUserPool",
+            self_sign_up_enabled=True,  
+            auto_verify=cognito.AutoVerifiedAttrs(email=True), 
+            password_policy=cognito.PasswordPolicy(
+                min_length=8,
+                require_digits=True,
+                require_lowercase=True,
+                require_uppercase=True,
+                require_symbols=False
+                ),
+            sign_in_aliases=cognito.SignInAliases(email=True),
+            account_recovery=cognito.AccountRecovery.EMAIL_ONLY,
+            standard_attributes=cognito.StandardAttributes(
+                email=cognito.StandardAttribute(required=True)
+            )
+        )
+
+        user_pool_client = cognito.UserPoolClient(
+            self, "JiraUserPoolClient",
+            user_pool=user_pool,
+            generate_secret=False,  
+            auth_flows=cognito.AuthFlow(
+                user_password=True,  
+                user_srp=True  
+            ),
+            o_auth=cognito.OAuthSettings(
+                flows=cognito.OAuthFlows(authorization_code_grant=True),
+                callback_urls=["http://localhost:4200"],  
+                logout_urls=["http://localhost:4200"]
+            )
+        )
+        # authorizer = apigateway.CognitoUserPoolsAuthorizer(
+        #     self, "JiraCognitoAuthorizer",
+        #     cognito_user_pools=[user_pool]
+        # )
+
+
  
 
         def create_lambda_function(id, handler, include_dir, method, layers, environment):
@@ -81,6 +124,30 @@ class BackendStack(Stack):
                 role=lambda_role
             )
             return function
+        
+        register_user_lambda_function=create_lambda_function(
+            "Register",
+            "register.handler",
+            "lambda",
+            "POST",
+            [request_layer],
+            {
+                "USER_POOL_ID":user_pool.user_pool_id,
+                "CLIENT_ID":user_pool_client.user_pool_client_id
+            }
+        )
+
+        email_confirmation=create_lambda_function(
+            "ConfirmEmail",
+            "confirmation.handler",
+            "lambda",
+            "POST",
+            [request_layer],
+            {
+                "USER_POOL_ID":user_pool.user_pool_id,
+                "CLIENT_ID":user_pool_client.user_pool_client_id
+            }
+        )
 
         save_issues = create_lambda_function(
             "SaveIssues",  
@@ -90,7 +157,7 @@ class BackendStack(Stack):
             [request_layer, pinecone_layer],
             {
                 "JIRA_SECRET_ARN": jira_secret.secret_arn,
-                "JIRA_URL" : JIRA_URL,
+                "JIRA_URL" : JIRA_URL_BASE,
                 "JIRA_EMAIL" : JIRA_EMAIL,
                 "JIRA_URL_COMMENTS": JIRA_URL_COMMENTS,
                 "PINECONE_INDEX_URL": PINECONE_INDEX_URL,
@@ -163,6 +230,14 @@ class BackendStack(Stack):
         self.api.root.add_resource("jiraWebhookHandler").add_method("POST", jira_webhook_integration, authorization_type=apigateway.AuthorizationType.NONE) 
 
 
+        registration_integration=apigateway.LambdaIntegration(register_user_lambda_function)
+        self.api.root.add_resource("register").add_method("POST",registration_integration,authorization_type=apigateway.AuthorizationType.NONE)
+        
+
+
+        confirmation_integration=apigateway.LambdaIntegration(email_confirmation)
+        self.api.root.add_resource("confirm").add_method("POST",confirmation_integration,authorization_type=apigateway.AuthorizationType.NONE)
+        
 
         chat_table = dynamodb.Table(
             self,
@@ -186,9 +261,9 @@ class BackendStack(Stack):
 
         get_messages_by_id = create_lambda_function(
             "getChatLambda",
-            "getMessagesById.handler",
+            "getMessagesByChatId.handler",
             "lambda",
-            "POST",
+            "GET",
             [],
             {
                 "TABLE_NAME": chat_table.table_name
@@ -196,4 +271,14 @@ class BackendStack(Stack):
 
         )
         chat_table.grant_write_data(save_message_lambda)
-        chat_table.grant_write_data(get_messages_by_id)
+        chat_table.grant_read_data(get_messages_by_id)
+
+        save_message_resource = apigateway.root.add_resource("save-message")
+        save_message_resource.add_method(
+            "POST", apigateway.LambdaIntegration(save_message_lambda)
+        )
+
+        get_messages_resource = apigateway.root.add_resource("get-messages")
+        get_messages_resource.add_method(
+            "GET", apigateway.LambdaIntegration(get_messages_by_id)
+        )

@@ -1,0 +1,22 @@
+<div class="sidebar">
+    <div class="sidebar-header">
+      <h2>My Chats
+        <button class="add" (click)="addChat()">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </h2>
+    </div>
+    
+    <ul class="sidebar-menu">
+      <!-- Use ngFor to iterate over the chats array -->
+      <li *ngFor="let chat of chats">
+        {{ chat.name }} <!-- Display chat name -->
+      </li>
+    </ul>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Add content here -->
+  </div>
+  
