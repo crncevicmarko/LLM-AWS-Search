@@ -5,7 +5,7 @@ import boto3
 bedrock_client = boto3.client('bedrock-runtime', region_name="eu-west-1")
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('ChatHistory')  # Use your DynamoDB table name
+table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 
 def get_secret(secret_arn):
@@ -57,10 +57,17 @@ def generate_title(prompt):
 
 
 def handler(event, context):
-    try:
-        body = json.loads(event.get("body", ""))
 
+    try:
+        body = json.loads(event["body"])
+        chat_id = body["chat_id"]
         valueToUser=generate_title(body.get('text'))
+        table.put_item(
+            Item={
+                "chat_id": str(chat_id),
+                "title":valueToUser
+            }
+        )
 
         return {
             "statusCode": 200,
