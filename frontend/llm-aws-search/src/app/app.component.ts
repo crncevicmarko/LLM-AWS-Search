@@ -14,15 +14,7 @@ import { AuthService } from './services/auth.service';
   
 })
 export class AppComponent{
-  isLoggedIn: boolean = false;
-
-  constructor(private authService: AuthService) {}
   
-  ngOnInit() {
-    this.authService.isUserLoggedIn().subscribe(isLoggedIn => {
-      this.isLoggedIn = isLoggedIn;
-    });
-  }
   
   /*
   title = 'llm-aws-search';
