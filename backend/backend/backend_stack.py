@@ -195,7 +195,7 @@ class BackendStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="retreveUserInput.handler",
             layers=[pinecone_layer,langchain_layer],
-            code=_lambda.Code.from_asset("lambda/output/retreveUserInput.zip"),
+            code=_lambda.Code.from_asset("lambda"),
             role=lambda_role,
             memory_size=512, 
             timeout=Duration.seconds(60),
