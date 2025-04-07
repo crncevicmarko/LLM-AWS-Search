@@ -252,7 +252,6 @@ class BackendStack(Stack):
             partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
         )
-
         save_message_lambda = create_lambda_function(
             "SaveChatMessageLambda",
             "saveChatMessage.handler",
@@ -333,4 +332,22 @@ class BackendStack(Stack):
         self.api.root.add_resource("get-title").add_method("GET", get_title_integration)
 
 
+        get_chats_by_userid = _lambda.Function(
+            self, "getChatByUserLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="getChatsByUserId.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            memory_size=512,
+            timeout=Duration.seconds(60),
+            environment={
+                "TABLE_NAME": chat_titles.table_name  # Use the correct table here
+            }
+        )
+
+        chat_titles.grant_read_data(get_chats_by_userid)
+
+
+        get_chats_by_userid_integration = apigateway.LambdaIntegration(get_chats_by_userid)
+
+        self.api.root.add_resource("chats-by-user").add_method("GET", get_chats_by_userid_integration)
 

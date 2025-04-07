@@ -61,11 +61,13 @@ def handler(event, context):
     try:
         body = json.loads(event["body"])
         chat_id = body["chat_id"]
+        user_id = body["user_id"]
         valueToUser=generate_title(body.get('text'))
         table.put_item(
             Item={
                 "chat_id": str(chat_id),
-                "title":valueToUser
+                "title":valueToUser,
+                "user_id":str(user_id)
             }
         )
 
