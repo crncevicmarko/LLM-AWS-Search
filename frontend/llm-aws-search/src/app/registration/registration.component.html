@@ -38,24 +38,27 @@
       </mat-form-field>
 
   
-    </form>
+    </form> 
+  <div class="validation-message-div">
+    <div *ngIf="createRegisterForm.hasError('passwordMismatch')" class="error-message">
+      Passwords do not match.
+    </div>
 
-      <div class="example-button-row">
-        <button (click)="register()" id="button" mat-raised-button [disabled]="!createRegisterForm.valid">
-          Register
-          <mat-icon class="icon">how_to_reg</mat-icon>
-        </button>
-      </div>
-
-      
-<div *ngIf="createRegisterForm.hasError('passwordMismatch')" class="error-message">
-  Passwords do not match.
-</div>
-
-<div *ngIf="!isFormValid" class="error-message">
-  Input data are not valid!
-</div>
-
+    <div *ngIf="!formValid" class="error-message">
+      Input data are not valid!
+    </div>
+  </div>
+  
+  <div class="example-button-row">
+    <button (click)="register()" id="button" mat-raised-button >
+      Register
+      <mat-icon class="icon">how_to_reg</mat-icon>
+    </button>
+  </div>
+  <div class="back-to-login">
+    <p>Already have one?</p><p [routerLink]="['/login']">Log in</p>
+  </div>
+  
 </div>
 
 

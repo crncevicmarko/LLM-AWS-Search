@@ -2,6 +2,8 @@ import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core'
 import { ChatService } from '../services/chatbot.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.component';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -11,33 +13,41 @@ import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.c
   standalone:false,
 })
 export class ChatbotComponent {
+  isLoggedIn: boolean = false;
   
-
   title = 'llm-aws-search';
-thinking: boolean=false;
-@ViewChild('chatBox') chatBox: ElementRef | undefined;
-@ViewChild('chatInput') chatInput: ElementRef | undefined;
-userInput: string = ''; // Variable to bind input value
-userMessages:string [] = [];  // Array to store the chat messages
-botMessages:string[]=[];
-time:string=new Date().toLocaleTimeString();
-htmlContent:string="";
-typingSpeed: number = 50;
-constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent) { }
+  thinking: boolean=false;
+  @ViewChild('chatBox') chatBox: ElementRef | undefined;
+  @ViewChild('chatInput') chatInput: ElementRef | undefined;
+  userInput: string = ''; 
+  userMessages:string [] = [];  
+  botMessages:string[]=[];
+  time:string=new Date().toLocaleTimeString();
+  htmlContent:string="";
+  typingSpeed: number = 50;
 
-  // Function to handle form submission
+  constructor(private chatService: ChatService, 
+    private cdRef: ChangeDetectorRef,
+    private mdComp:MarkdownDisplayComponent,
+    private authService: AuthService,
+    private router: Router) { }
+
+  ngOnInit() {
+    const token = this.authService.getAccessTokenFromLocalStorage();
+    if (token) this.isLoggedIn = true;
+    else this.isLoggedIn = false;
+  }
+
   onSubmit() {
     if (this.isSameAsLastPrompt())
     {
       alert('Your input is the same as the last prompt. Please enter something different.');
       return
     }
-    // Prepare the data payload
     const payload = { message: this.userInput };
     this.userMessages.push(this.userInput);
     this.thinking=true;
     this.userInput="";
-    // Send the POST request
 
     // this.chatService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response;
     //   setTimeout(() => {
@@ -68,17 +78,16 @@ constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,pr
     const typingSpeed = 300;  // Adjust typing speed for each batch of words
     
     const intervalId = setInterval(() => {
-      // Add next 10 words to the current message
       currentWords.push(...words.slice(index, index + wordsPerBatch));
       this.botMessages[responseIndex] = currentWords.join(" "); // Join the words and update the message
       
-      this.cdRef.detectChanges();  // Ensure UI update
+      this.cdRef.detectChanges();
 
       index += wordsPerBatch;
 
       if (index >= words.length) {
-        clearInterval(intervalId); // Stop when all words are displayed
-        this.thinking = false; // Enable the button again when typing is done
+        clearInterval(intervalId); 
+        this.thinking = false;
       }
     }, typingSpeed);
   }
@@ -92,7 +101,6 @@ constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,pr
     this.autoScroll();
   }
   resizeInput(inputElement: HTMLTextAreaElement): void {
-    // Reset the height of the input element
     
     inputElement.style.height = 'auto';
 
@@ -109,5 +117,11 @@ constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,pr
     if (chatBoxElement) {
       chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
     }
+  }
+
+  logOut(): void {
+    console.log("USO");
+    this.authService.signOut();
+    this.router.navigate(['login']);
   }
 }
