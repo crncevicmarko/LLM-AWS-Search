@@ -60,7 +60,7 @@ def loadTheTxt(filter_results, user_question):
 def search_pinecone(query_vector, params):
     ticket_id = params.get('id', None)
     creator_name = params.get('creator', None)
-
+    
     filter_conditions = {}
     if ticket_id:
         filter_conditions["id"] = {"$eq": ticket_id}

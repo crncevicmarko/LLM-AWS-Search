@@ -14,7 +14,9 @@ export class ChatService{
       console.log(query);
       const messageContent = query.message;
       const userMessage = {
-        text: messageContent
+        user_input: messageContent,
+        chat_history:[]
+
       };
 
         // return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
