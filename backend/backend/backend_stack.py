@@ -96,7 +96,7 @@ class BackendStack(Stack):
                 default_cors_preflight_options={
                     "allow_origins": ["http://localhost:4200"],
                     "allow_methods": apigateway.Cors.ALL_METHODS,  
-                    "allow_headers": ["Content-Type", "Authorization"],  
+                    "allow_headers": ["*"],
                     "allow_credentials": True  
                 }
             )

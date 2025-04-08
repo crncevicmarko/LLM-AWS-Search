@@ -1,19 +1,30 @@
 const { CognitoJwtVerifier } = require("aws-jwt-verify");
 
-function generatePolicy(principalId) {
+function generatePolicy(principalId, effect, resource) {
     return {
-        isAuthorized: true,
-        context: { user: principalId },
+      principalId,
+      policyDocument: {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Effect: "Allow",
+            Action: "execute-api:Invoke",
+            Resource: [`${resource.split('/')[0]}/*`],
+        },
+        ],
+      },
+      context: {
+        user: principalId,
+      },
     };
-}
+  }
 
 exports.handler = async function (event) {
     console.log("Event:", JSON.stringify(event));
 
-    const authHeader = event.headers.authorization;
+    const authHeader = event.authorizationToken;
     console.log("Auth Header:", authHeader);
 
-    // Provera da li postoji authorization header
     if (!authHeader) {
         console.log("No auth header");
         return {
@@ -25,12 +36,10 @@ exports.handler = async function (event) {
 
     const token = authHeader.split(" ")[1];
 
-    // Pristupanje konfiguraciji korisničkog pool-a i client ID-u iz env varijabli
     const userPoolId = process.env.USER_POOL_ID;
     const clientId = process.env.CLIENT_ID;
     console.log("Token: ", token);
 
-    // Kreiranje Cognito verifiera za verifikaciju tokena
     const verifier = CognitoJwtVerifier.create({
         userPoolId: userPoolId,
         tokenUse: "access",
@@ -50,5 +59,5 @@ exports.handler = async function (event) {
         };
     }
 
-    return generatePolicy(payload.sub);
+    return generatePolicy(payload.sub, "Allow", event.methodArn);
 };
