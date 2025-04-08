@@ -5,6 +5,8 @@ import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.c
 import { ActivatedRoute, Router } from '@angular/router';
 import { Chat } from '../models/chat.model';
 import { ChatCommunicationService } from '../services/chat_service';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -13,9 +15,10 @@ import { ChatCommunicationService } from '../services/chat_service';
   styleUrl: './chatbot.component.css',
   standalone:false,
 })
-export class ChatbotComponent implements OnInit{
-  
 
+export class ChatbotComponent implements OnInit{
+  isLoggedIn: boolean = false;
+  
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -34,10 +37,14 @@ constructor(
   private cdRef: ChangeDetectorRef,
   private mdComp:MarkdownDisplayComponent,
   private route: ActivatedRoute,
+  private authService: AuthService,
   private router: Router
 ) { }
 
   ngOnInit(): void {
+    const token = this.authService.getAccessTokenFromLocalStorage();
+    if (token) this.isLoggedIn = true;
+    else this.isLoggedIn = false;
     this.route.paramMap.subscribe(params => {
       this.chatId = params.get('id')!;
     });
@@ -72,7 +79,7 @@ constructor(
       index += wordsPerBatch;
 
       if (index >= words.length) {
-        clearInterval(intervalId);
+        clearInterval(intervalId); 
         this.thinking = false;
       }
     }, typingSpeed);
@@ -101,6 +108,11 @@ constructor(
     if (chatBoxElement) {
       chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
     }
+  }
+
+  logOut(): void {
+    this.authService.signOut();
+    this.router.navigate(['login']);
   }
 }
 
