@@ -4,6 +4,7 @@ import { AppComponent } from './app.component';
 import { AccountConfirmationComponent } from './account-confirmation/account-confirmation.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { LoginComponent } from './login/login.component';
+import { ChatBotPageComponent } from './chat-bot-page/chat-bot-page.component';
 import { AuthGuard } from './infrastracture/auth.guard';
 
 export const routes: Routes = [
@@ -11,11 +12,13 @@ export const routes: Routes = [
   { path: '', redirectTo: '/chat', pathMatch: 'full' },
   
   // Define the route for the chat page
+
+  { path: 'chat/:id', component:  ChatBotPageComponent},
   { path: 'chat', component: ChatbotComponent, canActivate : [AuthGuard] },
   
   // You can add additional routes here if you want to handle other pages
   
-  // Example for a 404 route
+  // Example for a 404 route,
   //{ path: '**', redirectTo: '/chat' },  // Redirect unknown routes to /chat
 
   {component:AccountConfirmationComponent,path:"verifyAccount/:username"},
