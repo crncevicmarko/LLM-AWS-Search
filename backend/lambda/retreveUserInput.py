@@ -56,11 +56,21 @@ def loadTheTxt(filter_results, user_question):
     return formatted_prompt 
 
 
-def search_pinecone(query_vector):
+def search_pinecone(query_vector, params):
+    ticket_id = params.get('id', None)
+    creator_name = params.get('creator', None)
+
+    filter_conditions = {}
+    if ticket_id:
+        filter_conditions["id"] = {"$eq": ticket_id}
+    if creator_name:
+        filter_conditions["creator"] = {"$eq": creator_name}
+
     query_result = index.query(
         vector=query_vector,
         top_k=3,
         include_metadata=True,
+        filter=filter_conditions if filter_conditions else None, 
         namespace="jira"
     )
     
@@ -93,7 +103,23 @@ def generate_response_from_llm(prompt):
     model_output = json.loads(response['body'].read().decode('utf-8'))
     return model_output.get('content')[0].get('text')
 
+def format_prompt_for_pinecone(user_question):
+    prompt = (f"Extract specific information from the following text. If the text contains any mention of a creator (such as 'creator', 'created by', 'author', or similar terms), extract the name following that mention and assign it to the 'creator' field in a JSON object."
+    f"If the text includes an ID in the format 'SCRUM-' followed by a number (e.g., SCRUM-12), extract it and assign it to the 'id' field."
+    f"If neither of these values is found, return an empty JSON."
+    f"Input text: {user_question}"
+    f"Output Format: The output **must** be **valid JSON only**, without any additional text."
+    """{
+    "creator": '<extracted_creator_name>',
+    "id": '<extracted_id>'
+    }"""
+    "If no relevant information is found, return: {} and if only one relevant information is found return only one"
+    )
+    return prompt
+
 def format_prompt_for_llm(filtered_results, user_question, chat_history):
+    print("Entered format_prompt_for_llm", filtered_results)
+
     if not filtered_results:
         # If no tickets are found, provide a useful alternative response
         return (
@@ -208,9 +234,9 @@ def generate_unknown_prompt(user_input, chat_history):
 def handler(event, context):
     try:
         body = json.loads(event.get("body","{}"))
+        user_input = body.get("text", "")
         chat_history = body.get("chat_history", [])
-        user_input = body.get("user_input", "")
-
+      
         if not user_input:
             return{
                 "statusCode":400,
@@ -222,7 +248,13 @@ def handler(event, context):
         
         query_embedding = generate_text_embeding(formatted_chat_history + user_input)
 
-        search_results = search_pinecone(query_embedding)
+        prompt_for_pinecone = format_prompt_for_pinecone(user_input)
+        search_params = generate_response_from_llm(prompt_for_pinecone)
+
+        # print(f"Search params: {search_params}")
+
+        search_results = search_pinecone(query_embedding, json.loads(search_params))
+        print("Search results: ", search_results)
 
         prompt = format_prompt_for_llm(search_results, user_input, formatted_chat_history)
 
