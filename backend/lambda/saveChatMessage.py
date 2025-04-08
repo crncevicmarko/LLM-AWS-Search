@@ -2,43 +2,41 @@ import os
 import json
 import time
 import boto3
-import logging
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ["TABLE_NAME"])
 
 def handler(event, context):
-    logger.info(f"Received event: {json.dumps(event)}")
-
     try:
-        body = event["body"]
+        body = json.loads(event.get("body","{}"))
 
-        chat_id = body["chat_id"]
-        message = body["message"]
+        user_id = body.get("user_id", "")
+        chat_id = body.get("chat_id", "")
+        userMessage = body.get("user_message","")
+        chatMessage = body.get("chat_message","")
         timestamp = int(time.time())
-
-        logger.info(f"Saving message for chat_id: {chat_id} at timestamp: {timestamp}")
 
         table.put_item(
             Item={
+                "user_id": str(user_id),
                 "chat_id": str(chat_id),
                 "timestamp": timestamp,
-                "message": message
+                "user_message": userMessage,
+                "chat_message": chatMessage,
             }
         )
 
-        logger.info("Message saved successfully.")
-
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization"
+            },
             "body": json.dumps({"message": "Message saved successfully!"})
         }
     
     except Exception as e:
-        logger.exception("Error saving message to DynamoDB.")
         return {
             "statusCode": 500,
             "body": json.dumps({"error": str(e)})

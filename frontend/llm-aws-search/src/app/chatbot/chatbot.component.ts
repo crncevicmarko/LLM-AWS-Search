@@ -1,7 +1,10 @@
-import { AfterViewChecked, Component,ElementRef,ViewChild } from '@angular/core';
+import { AfterViewChecked, Component,ElementRef,OnInit,ViewChild } from '@angular/core';
 import { ChatService } from '../services/chatbot.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Chat } from '../models/chat.model';
+import { ChatCommunicationService } from '../services/chat_service';
 
 
 @Component({
@@ -10,7 +13,7 @@ import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.c
   styleUrl: './chatbot.component.css',
   standalone:false,
 })
-export class ChatbotComponent {
+export class ChatbotComponent implements OnInit{
   
 
   title = 'llm-aws-search';
@@ -23,62 +26,54 @@ botMessages:string[]=[];
 time:string=new Date().toLocaleTimeString();
 htmlContent:string="";
 typingSpeed: number = 50;
-constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,private mdComp:MarkdownDisplayComponent) { }
+chatId: string = '';
+chat: any;
+constructor(
+  private chatService: ChatService,
+  private chatCommunicationService: ChatCommunicationService,
+  private cdRef: ChangeDetectorRef,
+  private mdComp:MarkdownDisplayComponent,
+  private route: ActivatedRoute,
+  private router: Router
+) { }
 
-  // Function to handle form submission
-  onSubmit() {
-    if (this.isSameAsLastPrompt())
-    {
-      alert('Your input is the same as the last prompt. Please enter something different.');
-      return
-    }
-    // Prepare the data payload
-    const payload = { message: this.userInput };
-    this.userMessages.push(this.userInput);
-    this.thinking=true;
-    this.userInput="";
-    // Send the POST request
-
-    // this.chatService.recieveUserInput(payload).subscribe(res=> { const parsedResponse = res.response;
-    //   setTimeout(() => {
-    //     console.log(res);
-    //     this.botMessages.push(this.mdComp.convertMarkdownToHTML(parsedResponse));
-    //     this.thinking = false; // Enable button after delay
-    //   }, 1000); // Adjust the delay as needed
-    // });
-    this.chatService.recieveUserInput(payload).subscribe(res => {
-      const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
-  
-      // Initialize empty message for typing effect
-      this.botMessages.push("");
-      const responseIndex = this.botMessages.length - 1;
-  
-      // Add a slight delay before starting to type
-      // setTimeout(() => {
-        this.simulateTyping(parsedResponse, responseIndex);
-      // }, 200);
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      this.chatId = params.get('id')!;
     });
+  }
+
+  onSubmit() {
+    const uuid = crypto.randomUUID();
+    console.log("Usli u onSubmit")
+    const userMessage = this.userInput;
+    console.log("User input: ", userMessage)
+    // Create the chat
+    const newChat = this.chatCommunicationService.startNewChat(1, uuid);
+    console.log("New Chat: ", newChat)
+  
+    this.chatCommunicationService.sendUserInput(userMessage, uuid);
+    this.router.navigate(['/chat', uuid]);
   }
 
   simulateTyping(response: string, responseIndex: number) {
     let words = response.split(' ');
     let currentWords = [];
     let index = 0;
-    const wordsPerBatch = 5; // Define the number of words per batch
-    const typingSpeed = 300;  // Adjust typing speed for each batch of words
+    const wordsPerBatch = 5;
+    const typingSpeed = 300;
     
     const intervalId = setInterval(() => {
-      // Add next 10 words to the current message
       currentWords.push(...words.slice(index, index + wordsPerBatch));
-      this.botMessages[responseIndex] = currentWords.join(" "); // Join the words and update the message
+      this.botMessages[responseIndex] = currentWords.join(" ");
       
-      this.cdRef.detectChanges();  // Ensure UI update
+      this.cdRef.detectChanges();
 
       index += wordsPerBatch;
 
       if (index >= words.length) {
-        clearInterval(intervalId); // Stop when all words are displayed
-        this.thinking = false; // Enable the button again when typing is done
+        clearInterval(intervalId);
+        this.thinking = false;
       }
     }, typingSpeed);
   }
@@ -92,16 +87,13 @@ constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,pr
     this.autoScroll();
   }
   resizeInput(inputElement: HTMLTextAreaElement): void {
-    // Reset the height of the input element
     
     inputElement.style.height = 'auto';
 
-    // Set the height to match the scrollHeight (to simulate expansion)
     inputElement.style.height = `${inputElement.scrollHeight}px`;
 
-    // Ensure the height doesn't grow indefinitely, e.g., setting max-height
     if (inputElement.scrollHeight > 100) {
-      inputElement.style.height = '100px'; // Max height, can be adjusted
+      inputElement.style.height = '100px';
     }
   }
   private autoScroll(): void {
@@ -111,3 +103,4 @@ constructor(private chatService: ChatService,private cdRef: ChangeDetectorRef,pr
     }
   }
 }
+

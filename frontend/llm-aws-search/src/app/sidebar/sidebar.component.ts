@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Chat } from '../models/chat.model';
 import { ChatService } from '../services/chatbot.services';
+import { ChatCommunicationService } from '../services/chat_service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,14 +14,19 @@ export class SidebarComponent {
   chats:Chat[]=[];
 
 
-  constructor(private chatService:ChatService) { }
+  constructor(private chatService:ChatService, private chatCommunicationService: ChatCommunicationService) {}
 
   ngOnInit(): void {
-    this.chats=this.chatService.getAllChats(1);
-    }
+    this.chatCommunicationService.newChat$.subscribe((newChat: Chat) => {
+      console.log('New chat received in sidebar:', newChat);
+      this.chats.push(newChat);
+    });
+  }
   addChat()
   {
-    this.chats=this.chatService.startNewChat(1);
+    const uuid = crypto.randomUUID();
+    console.log("UUID: ",uuid)
+    this.chats=this.chatService.startNewChat(1, uuid);
   }
   changeName(newName:string)
   {

@@ -71,3 +71,14 @@
     }
   }
   
+  .hoverable {
+    cursor: pointer;
+    text-decoration: none;
+    color: #ee4dd3;; /* Default text color */
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .hoverable:hover {
+    color: #a53c94;; /* Change color on hover */
+    text-decoration: none; /* Optional underline effect */
+  }

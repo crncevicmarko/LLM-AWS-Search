@@ -1,6 +1,6 @@
 <div class="sidebar">
     <div class="sidebar-header">
-      <h2>My Chats
+      <h2 [routerLink]="['/chat']" class="hoverable">My Chats
         <button class="add" (click)="addChat()">
           <i class="fa-solid fa-plus"></i>
         </button>
@@ -10,7 +10,7 @@
     <ul class="sidebar-menu">
       <!-- Use ngFor to iterate over the chats array -->
       <li *ngFor="let chat of chats">
-        {{ chat.name }} <!-- Display chat name -->
+        <a [routerLink]="['/chat', chat.id]">{{ chat.name }}</a> <!-- Display chat name -->
       </li>
     </ul>
   </div>
@@ -19,4 +19,5 @@
   <div class="main-content">
     <!-- Add content here -->
   </div>
+  
   

@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { ChatBotPageComponent } from './chat-bot-page/chat-bot-page.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
     MarkdownDisplayComponent,
     ChatbotComponent,  // Declare your components here
     SidebarComponent,
+    ChatBotPageComponent,
     
   ],
   imports: [
