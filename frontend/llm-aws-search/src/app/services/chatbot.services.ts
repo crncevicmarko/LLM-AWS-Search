@@ -19,15 +19,11 @@ export class ChatService{
       
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
     }
-    getAllChats(userId:any): Chat[] {
-      const chats:Chat[] = [
-        { userId:1,name: 'Chat 1',id:1,chatHistory:[]},
-        {userId:1,name: 'Chat 2',id:2,chatHistory:[]},
-        {userId:1,name: 'Chat 3',id:3,chatHistory:[] },
-        { userId:1,name: 'Chat 4',id:4,chatHistory:[] }
-      ];
-      return chats;
-    }
+    getUserChats(userId: string): Observable<Chat[]> {
+
+      return this.http.get<any[]>(`${this.apiHost}/chats-by-user?user_id=`+userId, { headers: this.headers })
+          
+  }
     startNewChat(userId:any):Chat[]
     {
       const chats:Chat[] = [
@@ -40,11 +36,6 @@ export class ChatService{
       console.log(chats);
       return chats;
     }
-    setChatName(text:string):Observable<any>{
-      return this.http.post<any>(this.apiHost+ '/generate-title',text, {headers: this.headers})
-    }
-    getChatName(chat_id:any):Observable<any>{
-      return this.http.get<any>(this.apiHost+ '/get-title?chat_id='+chat_id, {headers: this.headers})
-    }
+    
 
     }
