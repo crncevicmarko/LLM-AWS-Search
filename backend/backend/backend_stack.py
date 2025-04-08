@@ -308,7 +308,6 @@ class BackendStack(Stack):
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
 
-
         save_message_resource = self.api.root.add_resource("save-message")
         save_message_resource.add_method(
             "POST", apigateway.LambdaIntegration(save_message_lambda),
@@ -356,6 +355,3 @@ class BackendStack(Stack):
         get_title_integration = apigateway.LambdaIntegration(get_title_by_id_lambda)
 
         self.api.root.add_resource("get-title").add_method("GET", get_title_integration)
-
-
-

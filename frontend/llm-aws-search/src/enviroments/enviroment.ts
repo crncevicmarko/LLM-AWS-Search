@@ -1,7 +1,8 @@
 export const environment = {
     production: false,
-    apiUrl: 'https://8gq5dgs5tl.execute-api.eu-west-1.amazonaws.com/prod', 
-    userPoolId:"eu-west-1_GJM910t3k",
-    userPoolClientId:"6rj2r0d6unpd6q572qu26f56pu"
+    apiUrl: 'https://8gq5dgs5tl.execute-api.eu-west-1.amazonaws.com/prod',
+    dinamoDBUrlGetChatHistory: 'https://oud0d0fhr1.execute-api.eu-west-1.amazonaws.com/prod/get-messages',
+    userPoolId:"eu-west-1_GbRwE04nF",
+    userPoolClientId:"6fe9ffjtu8hm1ct54d90o5482q"
   };
   
