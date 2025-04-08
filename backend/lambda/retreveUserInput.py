@@ -179,6 +179,17 @@ def process_chat_history(chat_history):
         return first_four_messages + "\n" + summarized_history
     else:
         return "\n".join(chat_history)
+    
+def generate_unknown_prompt(user_input, chat_history):
+    if not chat_history:
+        chat_history = "No previous conversation available."
+    return (
+        f"Previous conversation: {chat_history}\n"
+        f"The user asked: {user_input}\n"
+        "You could not categorize the request earlier. Now, please just have a friendly, helpful conversation. "
+        "If possible, ask clarifying questions or politely help the user with general assistance. "
+        "Keep it short, friendly, and conversational."
+    )
 
 def handler(event, context):
     try:

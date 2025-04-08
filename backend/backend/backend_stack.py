@@ -275,6 +275,12 @@ class BackendStack(Stack):
             sort_key=dynamodb.Attribute(name="timestamp", type=dynamodb.AttributeType.NUMBER),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
         )
+        chat_titles = dynamodb.Table(
+            self,
+            "ChatTitles",
+            partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+        )
 
         save_message_lambda = create_lambda_function(
             "SaveChatMessageLambda",
@@ -302,15 +308,54 @@ class BackendStack(Stack):
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
 
-        save_message_integration = apigateway.LambdaIntegration(save_message_lambda)
-        self.api.root.add_resource("save-message").add_method("POST",
-                save_message_integration, 
-                authorization_type=apigateway.AuthorizationType.CUSTOM,
-                authorizer=lambda_authorizer) 
 
-        get_messages_integration = apigateway.LambdaIntegration(get_messages_by_id)
-        self.api.root.add_resource("get-messages").add_method("GET",
-                get_messages_integration,
-                authorization_type=apigateway.AuthorizationType.CUSTOM,
-                authorizer = lambda_authorizer) 
-        
+        save_message_resource = self.api.root.add_resource("save-message")
+        save_message_resource.add_method(
+            "POST", apigateway.LambdaIntegration(save_message_lambda),
+            authorization_type=apigateway.AuthorizationType.CUSTOM,
+            authorizer=lambda_authorizer
+        )
+
+        get_messages_resource = self.api.root.add_resource("get-messages")
+        get_messages_resource.add_method(
+            "GET", apigateway.LambdaIntegration(get_messages_by_id),
+            authorization_type=apigateway.AuthorizationType.CUSTOM,
+            authorizer=lambda_authorizer
+        )
+        title_generation_lambda = _lambda.Function(
+            self, "TitleGenerationLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="generateTitle.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            memory_size=512,
+            timeout=Duration.seconds(60),
+            environment={
+                "TABLE_NAME": chat_titles.table_name  
+            }
+        )
+
+        chat_titles.grant_write_data(title_generation_lambda)
+
+        title_generation_integration = apigateway.LambdaIntegration(title_generation_lambda)
+
+        self.api.root.add_resource("generate-title").add_method("POST", title_generation_integration)
+
+        get_title_by_id_lambda = create_lambda_function(
+            "GetTitleByIdLambda",
+            "getChatTitles.handler",  
+            "lambda",  
+            "GET",  
+            [],  
+            {
+                "TABLE_NAME": chat_titles.table_name  
+            }
+        )
+
+        chat_titles.grant_read_data(get_title_by_id_lambda)
+
+        get_title_integration = apigateway.LambdaIntegration(get_title_by_id_lambda)
+
+        self.api.root.add_resource("get-title").add_method("GET", get_title_integration)
+
+
+
