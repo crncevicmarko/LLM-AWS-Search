@@ -12,11 +12,11 @@ export class ChatService{
     apiHost: string=environment.apiUrl;
     dinamoDBUrlGetChatHistory: string=environment.dinamoDBUrlGetChatHistory;
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json', 'Accept':'*/*'})
-    recieveUserInput(query: any): Observable<any>{
+    recieveUserInput(query: any, chatHistory: any): Observable<any>{
       console.log(query);
       const messageContent = query.message;
       const userMessage = {
-        chat_history: "",
+        chat_history: chatHistory,
         user_input: messageContent
       };
       
