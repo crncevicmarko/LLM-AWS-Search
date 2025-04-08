@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CognitoUserPool, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 import { UserPostDTO } from '../models/userPostDTO.model';
 import { environment } from '../../enviroments/enviroment';
@@ -10,13 +10,14 @@ import { MaterialModule } from '../common/material.module';
 
 @Component({
   selector: 'app-registration',
-  imports: [MaterialModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.css'
 })
 export class RegistrationComponent {
 
-  hide: boolean = true; // Hide/show password toggle
+  hide: boolean = true; 
+  formValid: boolean = true;
 
   createRegisterForm = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -34,7 +35,10 @@ export class RegistrationComponent {
 
   
   register() {
-    
+    if(!this.createRegisterForm.valid){
+      this.formValid = false;
+      return;
+    }
     const user: UserPostDTO = {
       firstName: this.createRegisterForm.value.name,
       lastName: this.createRegisterForm.value.surname,

@@ -5,6 +5,7 @@ import { ChatService } from './services/chatbot.services';
 import { ChangeDetectorRef } from '@angular/core';
 import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { AuthService } from './services/auth.service';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -12,7 +13,10 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   standalone:false,
   
 })
-export class AppComponent{/*
+export class AppComponent{
+  
+  
+  /*
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
