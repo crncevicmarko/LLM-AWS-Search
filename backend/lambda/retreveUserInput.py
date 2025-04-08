@@ -137,38 +137,78 @@ def format_prompt_for_llm(filtered_results, user_question, chat_history):
         f"\nEnsure the response is structured, informative, and engaging. Every ticket must have a valid URL.\n"
         f"Assistant:"
     )
-
-def process_chat_history(chat_history):
-    """Keep the first 4 messages and summarize the rest if there are more."""
     
-    if len(chat_history) > 4:
-        first_four_messages = "\n".join(chat_history[:4])
-        older_messages = "\n".join(chat_history[4:])
+def format_chat_history_for_llm(chat_history, max_keep=4):
+    """
+    Process chat history for the LLM:
+    - Keep the first `max_keep` messages as-is
+    - Summarize older messages
+    - Return a list of structured messages (role/content)
+    """
+    # user_input = input_data.get("user_input", "")
+    messages = []
+
+    if len(chat_history) > max_keep:
+        first_messages = chat_history[:max_keep]
+        older_messages = chat_history[max_keep:]
 
         summary_prompt = (
-            f"Summarize the following chat history while keeping key details:\n\n{older_messages}"
+            f"Summarize the following chat history, keeping important details clear and concise:\n\n"
+            + "\n".join([f"User: {msg['user_message']} | Assistant: {msg['chat_message']}" for msg in older_messages])
         )
         summarized_history = generate_response_from_llm(summary_prompt)
 
-        return first_four_messages + "\n" + summarized_history
+        messages.append({
+            "role": "system",
+            "content": f"Previous conversation summary: {summarized_history}"
+        })
+
+        for msg in first_messages:
+            messages.append({
+                "role": "user",
+                "content": msg["user_message"]
+            })
+            messages.append({
+                "role": "assistant",
+                "content": msg["chat_message"]
+            })
     else:
-        return "\n".join(chat_history)
+        for msg in chat_history:
+            messages.append({
+                "role": "user",
+                "content": msg["user_message"]
+            })
+            messages.append({
+                "role": "assistant",
+                "content": msg["chat_message"]
+            })
+
+    # User input will be formatted in prompt separately from chat history
+    # if user_input:
+    #     messages.append({
+    #         "role": "user",
+    #         "content": user_input
+    #     })
+
+    message_string = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in messages])
+    print(f"CHAT HISTORY STRING: {message_string}")
+    return message_string
     
 def generate_unknown_prompt(user_input, chat_history):
     if not chat_history:
         chat_history = "No previous conversation available."
     return (
-        f"Previous conversation: {chat_history}\n"
-        f"The user asked: {user_input}\n"
-        "You could not categorize the request earlier. Now, please just have a friendly, helpful conversation. "
-        "If possible, ask clarifying questions or politely help the user with general assistance. "
-        "Keep it short, friendly, and conversational."
+        f"Previous conversation:\n{chat_history}\n\n"
+        f"User's latest message: {user_input}\n\n"
+        "Please continue the conversation naturally based on the above. "
+        "Respond directly to the user without explaining that you are continuing the conversation. "
+        "Be friendly, helpful, and concise."
     )
 
 def handler(event, context):
     try:
         body = json.loads(event.get("body","{}"))
-        chat_history = body.get("chat_history", "")
+        chat_history = body.get("chat_history", [])
         user_input = body.get("user_input", "")
 
         if not user_input:
@@ -177,14 +217,14 @@ def handler(event, context):
                 "body":json.dumps({"error":"No user input provided"})
             }
         
-        chat_history = process_chat_history(chat_history)
+        formatted_chat_history = format_chat_history_for_llm(chat_history)
 
         
-        query_embedding = generate_text_embeding(chat_history + user_input)
+        query_embedding = generate_text_embeding(formatted_chat_history + user_input)
 
         search_results = search_pinecone(query_embedding)
 
-        prompt = format_prompt_for_llm(search_results, user_input, chat_history)
+        prompt = format_prompt_for_llm(search_results, user_input, formatted_chat_history)
 
         valueToUser = ""
         if not prompt or "there are no relevant tickets found for the given query" in prompt.lower():
