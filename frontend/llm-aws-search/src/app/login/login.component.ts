@@ -2,13 +2,13 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { environment } from '../../enviroments/enviroment';
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../common/material.module';
 import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-login',
-  imports: [MaterialModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

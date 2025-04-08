@@ -183,8 +183,9 @@ def process_chat_history(chat_history):
 def handler(event, context):
     try:
         body = json.loads(event.get("body","{}"))
-        chat_history = body.get("chat_history", "")
-        user_input = body.get("user_input", "")
+        # chat_history = body.get("chat_history", "")
+        chat_history = ""
+        user_input = body.get("text", "")
 
         if not user_input:
             return{

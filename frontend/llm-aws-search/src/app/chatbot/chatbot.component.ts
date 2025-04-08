@@ -120,7 +120,6 @@ export class ChatbotComponent {
   }
 
   logOut(): void {
-    console.log("USO");
     this.authService.signOut();
     this.router.navigate(['login']);
   }
