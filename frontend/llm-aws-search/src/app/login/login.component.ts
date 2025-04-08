@@ -2,12 +2,13 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { environment } from '../../enviroments/enviroment';
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../common/material.module';
+import { AuthService } from '../services/auth.service';
 @Component({
   selector: 'app-login',
-  imports: [MaterialModule],
+  imports: [MaterialModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -29,7 +30,8 @@ export class LoginComponent {
   private userPool = new CognitoUserPool(this.userPoolData);
 
   constructor(
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   login(): void {
@@ -62,15 +64,14 @@ export class LoginComponent {
             }
 
             if (session) {
-              const idToken = session.getIdToken().getJwtToken();
-              console.log('idToken:', idToken);
+              const accessToken = session.getAccessToken().getJwtToken();
 
-              localStorage.setItem('idToken', idToken);
-              console.log('Stored idToken in localStorage:', idToken);
-              const username = session.getIdToken().payload['email'];//dobavljamo email tj username iz id  tokena
-              localStorage.setItem('username',username)
-              console.log('Username : ',username)
-              this.router.navigate(["/chat"])
+              localStorage.setItem('accessToken', accessToken);
+              
+              const username = session.getAccessToken().payload['email'];
+              localStorage.setItem('username',username);
+              this.authService.logIn();
+              this.router.navigate(["/chat"]);
             }
           });
         },
@@ -84,7 +85,6 @@ export class LoginComponent {
   register() {
     this.router.navigate(['register']);
   }
-  //dobijamo korisnicko ime iz tokena
   getUsernameFromSub(sub: string) {
     const poolData = {
       UserPoolId: environment.userPoolId,
@@ -104,7 +104,6 @@ export class LoginComponent {
         return;
       }
 
-      // Traženje korisničkog imena (username)
       if (attributes) {
         for (let attribute of attributes) {
           if (attribute.getName() === 'sub') {

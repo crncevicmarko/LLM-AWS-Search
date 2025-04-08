@@ -25,70 +25,6 @@ class BackendStack(Stack):
         JIRA_URL_COMMENTS = 'https://jiralevi9internship2025.atlassian.net/rest/api/2/search?jql=project=SCRUM&maxResults=1000&fields=comment'
         JIRA_EMAIL = 'grubor.masa@gmail.com'
         PINECONE_INDEX_URL = 'https://index-name-cj2bvvd.svc.aped-4627-b74a.pinecone.io'
-
-        
-        self.api = apigateway.RestApi(
-                self, 
-                "AIChatbotJiraAPI",
-                rest_api_name="AI Chatbot Jira API",
-                description="API for an AI chatbot retrieving data from Jira.",
-                endpoint_types=[apigateway.EndpointType.REGIONAL], 
-                default_cors_preflight_options={
-                    "allow_origins": apigateway.Cors.ALL_ORIGINS,  
-                    "allow_methods": apigateway.Cors.ALL_METHODS,  
-                    "allow_headers": ["*"],  
-                    "allow_credentials": True  
-                }
-                )
-        
-        
-        lambda_role = iam.Role(self, "LambdaRole",
-                               assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
-                               managed_policies=[
-                                   iam.ManagedPolicy.from_aws_managed_policy_name("SecretsManagerReadWrite"),
-                                    iam.ManagedPolicy.from_aws_managed_policy_name("AmazonAPIGatewayInvokeFullAccess"),
-                                   iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
-                                   iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess")
-                               ])
-        
-        jira_secret = secretsmanager.Secret.from_secret_name_v2(self, "JiraSecret", "JIRA_CREDENTIALS")
-        jira_secret.grant_read(lambda_role)
-        
-        pinecone_secrets = secretsmanager.Secret.from_secret_name_v2(self, "PineconeSecrets", "PINECONE_DB_SECRETS")
-        pinecone_secrets.grant_read(lambda_role)
-
-        request_layer = _lambda.LayerVersion(
-            self, "RequestsLayer",
-            code=_lambda.Code.from_asset("layers/requests.zip"),  
-            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-            description="Layer with requests module"
-        )
-
-        pinecone_layer = _lambda.LayerVersion(
-            self, "PineconeLayer",
-            code=_lambda.Code.from_asset("layers/pinecone.zip"),
-            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-        )
-
-        langchain_layer = _lambda.LayerVersion(
-            self, "LangchainLayer",
-            code=_lambda.Code.from_asset("layers/langchain.zip"),
-            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-        )
-
-        # pydantic_layer = _lambda.LayerVersion(
-        #     self, "PydanticLayer",
-        #     code=_lambda.Code.from_asset("layers/pydanticlayer.zip"),
-        #     compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-        # )
-
-        # pydantic_core_layer = _lambda.LayerVersion(
-        #     self, "PydanticCoreLayer",
-        #     code=_lambda.Code.from_asset("layers/pydantic_core.zip"),
-        #     compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
-        # )
-
-
         
         user_pool = cognito.UserPool(
             self, "JiraUserPool",
@@ -123,19 +59,84 @@ class BackendStack(Stack):
                 logout_urls=["http://localhost:4200"]
             )
         )
+
+        authorizer_layer = _lambda.LayerVersion(
+            self, "AuthorizerLayer",
+            code=_lambda.Code.from_asset("layers/authorizer.zip"),
+            compatible_runtimes=[_lambda.Runtime.NODEJS_18_X]
+        )
+
+        auth_lambda = _lambda.Function(self, "AuthLambda",
+            code=_lambda.Code.from_asset("lambda"),
+            handler="auth.handler",  
+            runtime=_lambda.Runtime.NODEJS_18_X,
+            layers=[authorizer_layer],
+            environment={
+                "USER_POOL_ID" : user_pool.user_pool_id,  
+                "CLIENT_ID" : user_pool_client.user_pool_client_id, 
+            }
+        )
+        # authorizer = apigateway.TokenAuthorizer(
+        #     self, "MovieAppAuthorizer",
+        #     handler=auth_lambda
+        # )
+
+        lambda_authorizer = apigateway.TokenAuthorizer(
+            self, 
+            "LambdaAuthorizer",  
+            handler=auth_lambda, 
+            # identity_source=apigateway.IdentitySource.header("Authorization"),  
+        )
+        
+        self.api = apigateway.RestApi(
+                self, 
+                "AIChatbotJiraAPI",
+                rest_api_name="AI Chatbot Jira API",
+                description="API for an AI chatbot retrieving data from Jira.",
+                endpoint_types=[apigateway.EndpointType.REGIONAL], 
+                default_cors_preflight_options={
+                    "allow_origins": ["http://localhost:4200"],
+                    "allow_methods": apigateway.Cors.ALL_METHODS,  
+                    "allow_headers": ["*"],
+                    "allow_credentials": True  
+                }
+            )
+        
+        
+        lambda_role = iam.Role(self, "LambdaRole",
+                               assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+                               managed_policies=[
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("SecretsManagerReadWrite"),
+                                    iam.ManagedPolicy.from_aws_managed_policy_name("AmazonAPIGatewayInvokeFullAccess"),
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("service-role/AWSLambdaBasicExecutionRole"),
+                                   iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess")
+                               ])
+        
+        jira_secret = secretsmanager.Secret.from_secret_name_v2(self, "JiraSecret", "JIRA_CREDENTIALS")
+        jira_secret.grant_read(lambda_role)
+        
+        pinecone_secrets = secretsmanager.Secret.from_secret_name_v2(self, "PineconeSecrets", "PINECONE_DB_SECRETS")
+        pinecone_secrets.grant_read(lambda_role)
+
+        request_layer = _lambda.LayerVersion(
+            self, "RequestsLayer",
+            code=_lambda.Code.from_asset("layers/requests.zip"),  
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+            description="Layer with requests module"
+        )
+
+        pinecone_layer = _lambda.LayerVersion(
+            self, "PineconeLayer",
+            code=_lambda.Code.from_asset("layers/pinecone.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
+        
         # authorizer = apigateway.CognitoUserPoolsAuthorizer(
         #     self, "JiraCognitoAuthorizer",
         #     cognito_user_pools=[user_pool]
         # )
-
-        # mt_authorizer_lambda_archive = shutil.make_archive(
-        #                                              "lambda/retreveUserInput.py",
-        #                                              "zip",
-        #                                              "output/retreveUserInput.zip")
-
-
  
-
         def create_lambda_function(id, handler, include_dir, method, layers, environment):
             function = _lambda.Function(
                 self, id,
@@ -194,7 +195,7 @@ class BackendStack(Stack):
             self, "TestLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="retreveUserInput.handler",
-            layers=[pinecone_layer,langchain_layer],
+            layers=[pinecone_layer],
             code=_lambda.Code.from_asset("lambda"),
             role=lambda_role,
             memory_size=512, 
@@ -211,7 +212,10 @@ class BackendStack(Stack):
 
         self.api.root.add_resource("SaveIssues").add_method("GET", get_tickets_integration, authorization_type=apigateway.AuthorizationType.NONE) 
         get_user_input = self.api.root.add_resource("test-chatbot")
-        get_user_input.add_method("POST", get_user_input_integration, authorization_type=apigateway.AuthorizationType.NONE)
+
+        get_user_input.add_method("POST", get_user_input_integration, 
+            authorization_type=apigateway.AuthorizationType.CUSTOM,
+            authorizer=lambda_authorizer)
 
         lambda_role = iam.Role(self, "LambdaBedrockRole",
                                assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
@@ -256,7 +260,7 @@ class BackendStack(Stack):
 
 
         registration_integration=apigateway.LambdaIntegration(register_user_lambda_function)
-        self.api.root.add_resource("register").add_method("POST",registration_integration,authorization_type=apigateway.AuthorizationType.NONE)
+        self.api.root.add_resource("register").add_method("POST", registration_integration,authorization_type=apigateway.AuthorizationType.NONE)
         
 
 
@@ -269,6 +273,12 @@ class BackendStack(Stack):
             "ChatHistory",
             partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
             sort_key=dynamodb.Attribute(name="timestamp", type=dynamodb.AttributeType.NUMBER),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+        )
+        chat_titles = dynamodb.Table(
+            self,
+            "ChatTitles",
+            partition_key=dynamodb.Attribute(name="chat_id", type=dynamodb.AttributeType.STRING),
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
         )
 
@@ -298,12 +308,50 @@ class BackendStack(Stack):
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
 
-        # save_message_resource = apigateway.root.add_resource("save-message")
-        # save_message_resource.add_method(
-        #     "POST", apigateway.LambdaIntegration(save_message_lambda)
-        # )
+        save_message_resource = self.api.root.add_resource("save-message")
+        save_message_resource.add_method(
+            "POST", apigateway.LambdaIntegration(save_message_lambda),
+            authorization_type=apigateway.AuthorizationType.CUSTOM,
+            authorizer=lambda_authorizer
+        )
 
-        # get_messages_resource = apigateway.root.add_resource("get-messages")
-        # get_messages_resource.add_method(
-        #     "GET", apigateway.LambdaIntegration(get_messages_by_id)
-        # )
+        get_messages_resource = self.api.root.add_resource("get-messages")
+        get_messages_resource.add_method(
+            "GET", apigateway.LambdaIntegration(get_messages_by_id),
+            authorization_type=apigateway.AuthorizationType.CUSTOM,
+            authorizer=lambda_authorizer
+        )
+        title_generation_lambda = _lambda.Function(
+            self, "TitleGenerationLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="generateTitle.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            memory_size=512,
+            timeout=Duration.seconds(60),
+            environment={
+                "TABLE_NAME": chat_titles.table_name  
+            }
+        )
+
+        chat_titles.grant_write_data(title_generation_lambda)
+
+        title_generation_integration = apigateway.LambdaIntegration(title_generation_lambda)
+
+        self.api.root.add_resource("generate-title").add_method("POST", title_generation_integration)
+
+        get_title_by_id_lambda = create_lambda_function(
+            "GetTitleByIdLambda",
+            "getChatTitles.handler",  
+            "lambda",  
+            "GET",  
+            [],  
+            {
+                "TABLE_NAME": chat_titles.table_name  
+            }
+        )
+
+        chat_titles.grant_read_data(get_title_by_id_lambda)
+
+        get_title_integration = apigateway.LambdaIntegration(get_title_by_id_lambda)
+
+        self.api.root.add_resource("get-title").add_method("GET", get_title_integration)

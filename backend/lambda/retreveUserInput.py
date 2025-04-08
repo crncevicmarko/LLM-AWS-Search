@@ -123,13 +123,7 @@ def format_prompt_for_llm(filtered_results, user_question, chat_history):
 
     if not filtered_results:
         # If no tickets are found, provide a useful alternative response
-        return (
-            f"Previous conversation: {chat_history}\n\n"
-            f"The user asked: {user_question}. "
-            f"Provide a **concise and relevant** response using key insights. "
-            f"Offer guidance or suggest possible actions in 2-3 sentences max.\n\n"
-            f"Assistant:"
-        )  #ZOVE UNKNWN TOOL
+        return generate_unknown_prompt(user_question, chat_history)
 
     formatted_results = []
     for match in filtered_results:
@@ -164,43 +158,95 @@ def format_prompt_for_llm(filtered_results, user_question, chat_history):
         f"\nEnsure the response is structured, informative, and engaging. Every ticket must have a valid URL.\n"
         f"Assistant:"
     )
-
-def process_chat_history(chat_history):
-    """Keep the first 4 messages and summarize the rest if there are more."""
     
-    if len(chat_history) > 4:
-        first_four_messages = "\n".join(chat_history[:4])
-        older_messages = "\n".join(chat_history[4:])
+def format_chat_history_for_llm(chat_history, max_keep=4):
+    """
+    Process chat history for the LLM:
+    - Keep the first `max_keep` messages as-is
+    - Summarize older messages
+    - Return a list of structured messages (role/content)
+    """
+    # user_input = input_data.get("user_input", "")
+    messages = []
+
+    if len(chat_history) > max_keep:
+        first_messages = chat_history[:max_keep]
+        older_messages = chat_history[max_keep:]
 
         summary_prompt = (
-            f"Summarize the following chat history while keeping key details:\n\n{older_messages}"
+            f"Summarize the following chat history, keeping important details clear and concise:\n\n"
+            + "\n".join([f"User: {msg['user_message']} | Assistant: {msg['chat_message']}" for msg in older_messages])
         )
         summarized_history = generate_response_from_llm(summary_prompt)
 
-        return first_four_messages + "\n" + summarized_history
+        messages.append({
+            "role": "system",
+            "content": f"Previous conversation summary: {summarized_history}"
+        })
+
+        for msg in first_messages:
+            messages.append({
+                "role": "user",
+                "content": msg["user_message"]
+            })
+            messages.append({
+                "role": "assistant",
+                "content": msg["chat_message"]
+            })
     else:
-        return "\n".join(chat_history)
+        for msg in chat_history:
+            messages.append({
+                "role": "user",
+                "content": msg["user_message"]
+            })
+            messages.append({
+                "role": "assistant",
+                "content": msg["chat_message"]
+            })
+
+    # User input will be formatted in prompt separately from chat history
+    # if user_input:
+    #     messages.append({
+    #         "role": "user",
+    #         "content": user_input
+    #     })
+
+    message_string = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in messages])
+    print(f"CHAT HISTORY STRING: {message_string}")
+    return message_string
+    
+def generate_unknown_prompt(user_input, chat_history):
+    if not chat_history:
+        chat_history = "No previous conversation available."
+    return (
+        f"Previous conversation:\n{chat_history}\n\n"
+        f"User's latest message: {user_input}\n\n"
+        "Please continue the conversation naturally based on the above. "
+        "Respond directly to the user without explaining that you are continuing the conversation. "
+        "Be friendly, helpful, and concise."
+    )
 
 def handler(event, context):
     try:
         body = json.loads(event.get("body","{}"))
-        chat_history = body.get("chat_history", "")
-        user_input = body.get("user_input", "")
-
+        user_input = body.get("text", "")
+        chat_history = body.get("chat_history", [])
+      
         if not user_input:
             return{
                 "statusCode":400,
-                "body":json.dumps({"error":"No user input provided"})
+                "body":json.dumps({"error":"Nso user input provided"})
             }
-        
-        chat_history = process_chat_history(chat_history)
+
+        formatted_chat_history = format_chat_history_for_llm(chat_history)
         #MAIN AGENT
-        search_results=main_agent(user_input,chat_history)
+        search_results=main_agent(user_input,formatted_chat_history)
 
-        print(search_results)
-
-        prompt = format_prompt_for_llm(search_results, user_input, chat_history)
-     
+        print(search_results[0].get("text") == "Unknown")
+        if(search_results.get("text")):
+            prompt = generate_unknown_prompt(user_input, chat_history)
+        else:
+            prompt = format_prompt_for_llm(search_results, user_input, formatted_chat_history)
 
         valueToUser = ""
         if not prompt or "there are no relevant tickets found for the given query" in prompt.lower():
@@ -263,9 +309,6 @@ def intent_classifier(user_input):
     except Exception as e:
         return f"Error classifying input:  {e}"
 
-
-
-
 def search_pinecone_metadata(query_vector, params):
     ticket_id = params.get('id', None)
     creator_name = params.get('creator', None)
@@ -289,9 +332,6 @@ def search_pinecone_metadata(query_vector, params):
     result = parsResponse(query_result)
     return result
 
-
-
-
 def search_pinecone_description(query_vector):
  
     query_result = index.query(
@@ -304,10 +344,6 @@ def search_pinecone_description(query_vector):
 
     result = parsResponse(query_result)
     return result
-
-def unknown_response(user_input):
-    pass
-
 
 def main_agent(user_input, chat_history):
     category = intent_classifier(user_input).lower()
@@ -335,7 +371,25 @@ def main_agent(user_input, chat_history):
         return search_pinecone_description(query_embedding)
 
     else:  # unknown
-        return []  # Or call unknown_response(user_input) if you want to handle this further
+    #     def parsResponse(query_result: str):
+    # results = []
+    # for match in query_result.get("matches", []):
+    #     metadata = match.get("metadata", {})
+    #     print("29 : ",metadata)
+    #     print("Score : ",match.get("score"))
+    #     if match.get("score") >= 0.01:
+    #         results.append({
+    #             "score": match.get("score"),
+    #             "text": metadata.get("text"),
+    #             "ticket-url": metadata.get("ticket-url"),
+    #         })
+    # return 
+        results_unknown = []
+        return results_unknown.append({
+            "score": None,
+            "text": "Unknown",
+            "ticket-url": None
+        })
 
 # def main_agent(user_input,chat_history):
 #     category=intent_classifier(user_input)

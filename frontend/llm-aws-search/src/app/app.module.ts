@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MarkdownDisplayComponent } from './markdown-display/markdown-display.component';
@@ -13,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { ChatBotPageComponent } from './chat-bot-page/chat-bot-page.component';
+import { Interceptor } from './infrastracture/interceptor';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,7 @@ import { SidebarComponent } from './sidebar/sidebar.component';
     MarkdownDisplayComponent,
     ChatbotComponent,  // Declare your components here
     SidebarComponent,
+    ChatBotPageComponent,
     
   ],
   imports: [
@@ -33,7 +36,13 @@ import { SidebarComponent } from './sidebar/sidebar.component';
     MatCardModule,
     MatProgressSpinnerModule
   ],
-  providers: [],
-  bootstrap: [AppComponent]  // Specify your root component
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: Interceptor,
+      multi: true,
+    },
+  ],
+  bootstrap: [AppComponent]  
 })
 export class AppModule { }
