@@ -192,7 +192,7 @@ ngOnInit(): void {
   
     // Make the API call to get the bot's response
     // this.chatService.recieveUserInput({ message: userMsg }, localStorage.getItem(chatId)).subscribe(res => {
-    this.chatService.recieveUserInput({ message: userMsg }, localStorage.getItem("09e16992-880b-4ee0-b20f-af7f6baa8c00")).subscribe(res => {
+    this.chatService.recieveUserInput({ message: userMsg }, sessionStorage.getItem("09e16992-880b-4ee0-b20f-af7f6baa8c00")).subscribe(res => {
       const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
