@@ -33,7 +33,9 @@ export class AccountConfirmationComponent implements OnInit {
     ClientId: environment.userPoolClientId
   });
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private route: ActivatedRoute) {
+  constructor(private fb: FormBuilder, private snackBar: MatSnackBar, private route: ActivatedRoute,
+    private router : Router
+  ) {
     this.confirmationForm = this.fb.group({
       confirmationCode: ['', Validators.required]
     });
@@ -68,6 +70,7 @@ export class AccountConfirmationComponent implements OnInit {
       } else {
         console.log('Account confirmed successfully:', result);
         this.snackBar.open('Account confirmed successfully.', 'Close', { duration: 3000 });
+        this.router.navigate(["login"]);
       }
     });
   }

@@ -32,6 +32,7 @@ chatHistory: any;
 chatPairs: { user: string, bot: string, timestamp: string }[] = [];
 private initialized = false;
 user_id = "";
+chat_history: any;
 constructor(
   private chatService: ChatService,
   private chatCommunicationService: ChatCommunicationService,
@@ -156,6 +157,7 @@ constructor(
               timestamp: new Date(chat.timestamp * 1000).toLocaleTimeString()
           }));
           console.log("CHAT PAIRS: ", this.chatPairs)
+          this.saveChatHistoryLocally();
         },
         error: err => {
           alert("Error getting bot response")
@@ -206,8 +208,26 @@ constructor(
       timestamp: currentTime
     });
   
-    // Make the API call to get the bot's response
-    this.chatService.recieveUserInput({ message: userMsg }).subscribe(res => {
+    const storedChat = sessionStorage.getItem(this.chatId);
+
+    let formattedChatHistory: any[] = [];
+
+    if (storedChat && storedChat.trim() !== "") {
+      try {
+        const parsed = JSON.parse(storedChat);
+        if (parsed.chatPairs && Array.isArray(parsed.chatPairs)) {
+          formattedChatHistory = parsed.chatPairs.map((pair: any) => ({
+            user_message: pair.user,
+            chat_message: pair.bot
+          }));
+        }
+      } catch (e) {
+        console.error("Error parsing sessionStorage: ", e);
+        formattedChatHistory = [];
+      }
+    }
+
+    this.chatService.recieveUserInput({ message: userMsg }, formattedChatHistory).subscribe(res => {
       const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
@@ -227,7 +247,7 @@ constructor(
           },
           error: (err) => {
             console.error('Failed to save message to DynamoDB:', err);
-            alert("Data is not successfuly saved"+ err)
+            // alert("Data is not successfuly saved"+ err)
           }
         });
 
