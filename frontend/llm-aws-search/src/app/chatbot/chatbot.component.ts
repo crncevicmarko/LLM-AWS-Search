@@ -5,6 +5,7 @@ import { MarkdownDisplayComponent } from '../markdown-display/markdown-display.c
 import { ActivatedRoute, Router } from '@angular/router';
 import { Chat } from '../models/chat.model';
 import { ChatCommunicationService } from '../services/chat_service';
+import { AuthService } from '../services/auth.service';
 
 
 @Component({
@@ -34,6 +35,7 @@ constructor(
   private cdRef: ChangeDetectorRef,
   private mdComp:MarkdownDisplayComponent,
   private route: ActivatedRoute,
+  private authService: AuthService,
   private router: Router
 ) { }
 
@@ -45,47 +47,17 @@ constructor(
 
   onSubmit() {
     const uuid = crypto.randomUUID();
-    console.log("Usli u onSubmit")
     const userMessage = this.userInput;
-    console.log("User input: ", userMessage)
-    // Create the chat
+
+    // create new chat in sidebar component
     const newChat = this.chatCommunicationService.startNewChat(1, uuid);
     console.log("New Chat: ", newChat)
   
+    // crete and initialize new chat page component
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
     this.router.navigate(['/chat', uuid]);
   }
-
-  simulateTyping(response: string, responseIndex: number) {
-    let words = response.split(' ');
-    let currentWords = [];
-    let index = 0;
-    const wordsPerBatch = 5;
-    const typingSpeed = 300;
-    
-    const intervalId = setInterval(() => {
-      currentWords.push(...words.slice(index, index + wordsPerBatch));
-      this.botMessages[responseIndex] = currentWords.join(" ");
-      
-      this.cdRef.detectChanges();
-
-      index += wordsPerBatch;
-
-      if (index >= words.length) {
-        clearInterval(intervalId);
-        this.thinking = false;
-      }
-    }, typingSpeed);
-  }
-
-  isSameAsLastPrompt(): boolean {
-
-    return this.userMessages[this.userMessages.length-1] === this.userInput;
-  }
   
-  ngAfterViewChecked(): void {
-    this.autoScroll();
-  }
   resizeInput(inputElement: HTMLTextAreaElement): void {
     
     inputElement.style.height = 'auto';
@@ -96,11 +68,10 @@ constructor(
       inputElement.style.height = '100px';
     }
   }
-  private autoScroll(): void {
-    const chatBoxElement = this.chatBox?.nativeElement;
-    if (chatBoxElement) {
-      chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
-    }
+
+  logOut(): void {
+    this.authService.signOut();
+    this.router.navigate(['login']);
   }
 }
 
