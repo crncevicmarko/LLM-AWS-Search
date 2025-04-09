@@ -69,6 +69,7 @@ export class RegistrationComponent {
       UserPoolId: environment.userPoolId, 
       ClientId: environment.userPoolClientId 
     };
+    console.log("user pool id:",environment.userPoolId)
     const userPool = new CognitoUserPool(poolData);
 
 

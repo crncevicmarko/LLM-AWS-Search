@@ -146,7 +146,7 @@ def format_prompt_for_llm(filtered_results, user_question, chat_history):
         f"Do **not** infer or provide additional details outside of the ticket descriptions. "
         f"Stick strictly to the content provided in the Jira tickets."
         f"Keep the response factual and concise.\n\n"
-        # f"Always respond in English, regardless of the user's input language. "
+        f"Always respond in English, regardless of the user's input language. "
         f"Format the response like this:\n"
         f"- Start with a friendly introduction, showing enthusiasm and care for the user's request.\n"
         f"- List each relevant Jira ticket with:\n"
@@ -222,6 +222,7 @@ def generate_unknown_prompt(user_input, chat_history):
         f"Previous conversation:\n{chat_history}\n\n"
         f"User's latest message: {user_input}\n\n"
         "Please continue the conversation naturally based on the above. "
+        "Older messages are provided for background but are less important. "
         "Respond directly to the user without explaining that you are continuing the conversation. "
         "Be friendly, helpful, and concise."
     )
@@ -229,7 +230,7 @@ def generate_unknown_prompt(user_input, chat_history):
 def handler(event, context):
     try:
         body = json.loads(event.get("body","{}"))
-        user_input = body.get("text", "")
+        user_input = body.get("user_input", "")
         chat_history = body.get("chat_history", [])
       
         if not user_input:
@@ -242,8 +243,8 @@ def handler(event, context):
         #MAIN AGENT
         search_results=main_agent(user_input,formatted_chat_history)
 
-        print(search_results[0].get("text") == "Unknown")
-        if(search_results.get("text")):
+        print(search_results)
+        if(search_results[0].get("text") == "Unknown"):
             prompt = generate_unknown_prompt(user_input, chat_history)
         else:
             prompt = format_prompt_for_llm(search_results, user_input, formatted_chat_history)
@@ -271,16 +272,17 @@ def handler(event, context):
         }
 
 def intent_classifier(user_input):
-    prompt=f"""You are an assistent that helps classify user requests into categories"
-            "Classify the following user query into one of thesw categories : "metadata","description",or "unknown"
-            User query:"{user_input}"
-            Categories:
-             - "metadata" for queries asking for creator,assignee, or mentions key words for such as (creator,assignee,id,created by,assigned to, creator's name,created on,reporter,owner)
-             -"description" for questions regarding the main content of the ticket or contains some of key words such as (how,summary,did,what,task,issue,problem,action,steps,work,description) 
-             -"unknown"  for any other queries
-            
-            Please return only one word as the category ("metadata","description","unknown").
-            """
+    prompt= ("You are an assistant that helps classify user requests into categories.\n"
+            f"""Classify the following user query into one of these categories: "metadata", "description", or "unknown".\n"""
+            f"User query: {user_input}\n"
+            'First, check if the query is related to technology, software development, AWS services, Angular, programming, or IT systems.'
+            'If the query is not related to any of these, classify it as "unknown"'
+            'If the query is related to any of these, classify it as one of metadata or description using following categories'
+            f"""- "metadata" for queries asking for creator, assignee, or mentioning keywords such as (creator, assignee, id, created by, assigned to, creator's name, created on, reporter, owner)
+            - "description" for questions regarding the main content of the ticket or containing keywords such as (how, summary, did, what, task, issue, problem, action, steps, work, description)
+            - "unknown" for any other queries, including those that are not related to technical topics, AWS services, Angular, or software development in general.\n"""
+            'For example output should be in this format: <category_name>'
+            )
     try:
         response = bedrock_client.invoke_model(
             modelId="anthropic.claude-3-haiku-20240307-v1:0",
@@ -336,7 +338,7 @@ def search_pinecone_description(query_vector):
  
     query_result = index.query(
         vector=query_vector,
-        top_k=3,
+        top_k=5,
         include_metadata=True,
         filter=None, 
         namespace="jira"
@@ -351,7 +353,7 @@ def main_agent(user_input, chat_history):
 
     print(f"[main_agent] Intent category: {category}")
 
-    if category == "metadata":
+    if "metadata" in categorys:
         print("316: "+ user_input)
         prompt_for_pinecone_query = format_prompt_for_pinecone(user_input)
         print("317 "+prompt_for_pinecone_query)
@@ -367,10 +369,10 @@ def main_agent(user_input, chat_history):
         print(f"[main_agent] Extracted metadata params: {extracted_params}")
         return search_pinecone_metadata(query_embedding, extracted_params)
 
-    elif category == "description":
+    elif "description" in category:
         return search_pinecone_description(query_embedding)
 
-    else:  # unknown
+    else :  # unknown
     #     def parsResponse(query_result: str):
     # results = []
     # for match in query_result.get("matches", []):
@@ -385,11 +387,12 @@ def main_agent(user_input, chat_history):
     #         })
     # return 
         results_unknown = []
-        return results_unknown.append({
+        results_unknown.append({
             "score": None,
             "text": "Unknown",
             "ticket-url": None
         })
+        return results_unknown
 
 # def main_agent(user_input,chat_history):
 #     category=intent_classifier(user_input)
