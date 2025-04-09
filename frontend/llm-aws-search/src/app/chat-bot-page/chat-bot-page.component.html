@@ -1,7 +1,15 @@
 <body>
+  <app-sidebar *ngIf="isLoggedIn"></app-sidebar>
+  <div class='main-content'>
     <main id="main" style="margin: 0;">
-        <div class="chat-box-container">
-        <h1 class="chat-box-header">tixie.</h1>
+      <div class="chat-box-container">
+        <div class="nav-bar">
+          <h1 class="chat-box-header">tixie.</h1>
+          <button mat-raised-button class="log-out-btn" (click)="logOut()" >
+            Log out
+          </button>
+        </div>
+          
         <div class="chat-box" #chatBox>
           <div *ngFor="let pair of chatPairs" class="ai-person-container">
             <div class="person-block">
@@ -16,22 +24,22 @@
             </div>
           </div>
         </div>
-        </div>
-  
+      </div>
+
       <form class="chat-form" (ngSubmit)="onSubmit()" #chatForm="ngForm">
         <mat-form-field class="chat-form-field" subscriptSizing="dynamic">
-            <textarea 
-              matInput
-              #chatInput
-              [(ngModel)]="userInput"
-              name="input"
-              class="chat-input"
-              placeholder="Type something..."
-              required
-              matAutosize
-              (input)="resizeInput(chatInput)"
-              (keydown.enter)="onSubmit()"
-            ></textarea>
+          <textarea 
+            matInput
+            #chatInput
+            [(ngModel)]="userInput"
+            name="input"
+            class="chat-input"
+            placeholder="Type something..."
+            required
+            matAutosize
+            (input)="resizeInput(chatInput)"
+            (keydown.enter)="onSubmit()"
+          ></textarea>
         </mat-form-field>
         
         <button
@@ -49,4 +57,6 @@
         </button>
       </form>
     </main>
-  </body>
+  </div>
+ 
+</body>

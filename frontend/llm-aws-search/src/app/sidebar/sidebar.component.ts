@@ -13,30 +13,21 @@ export class SidebarComponent {
   // Array of chat objects (you can fetch this from an API or service)
   chats:Chat[]=[];
 
-
   constructor(private chatService:ChatService, private chatCommunicationService: ChatCommunicationService) {}
 
   ngOnInit(): void {
-    this.chatCommunicationService.newChat$.subscribe((newChat: Chat) => {
-      console.log('New chat received in sidebar:', newChat);
-      this.chats.push(newChat);
+    this.chatCommunicationService.newChat$.subscribe(res => {
+      // ovde bi trebali da prikazujemo samo novo kreirane chatove iz chatCommunicationService-a
+      this.chats = this.chatCommunicationService.getAllChats();
     });
   }
   addChat()
   {
     const uuid = crypto.randomUUID();
-    console.log("UUID: ",uuid)
-    this.chats=this.chatService.startNewChat(1, uuid);
-  }
-  changeName(newName:string)
-  {
-    const chatToUpdate=this.chats.find(chat => chat.name === 'New Chat');
-    
-    if (chatToUpdate) {
-      chatToUpdate.name = newName;
-      console.log('Updated chat name:', chatToUpdate);
-    } else {
-      console.log('Chat with name "New Chat" not found');
-    }  
+    console.log("UUID: ",uuid) 
+    // ovo bi trebalo da kreira novi chat ali u chatCommunicationService-u i da ih tamo skadisti
+    this.chatCommunicationService.startNewChat(1, uuid);
+    // ovo bi trebalo da izvuce te chatove iz tog servisa i da ih displajuje kod sebe
+    this.chats = this.chatCommunicationService.getAllChats();
   }
 }
