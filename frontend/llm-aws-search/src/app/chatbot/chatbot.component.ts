@@ -14,9 +14,10 @@ import { AuthService } from '../services/auth.service';
   styleUrl: './chatbot.component.css',
   standalone:false,
 })
+
 export class ChatbotComponent implements OnInit{
-  
   isLoggedIn: boolean = false;
+  
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -39,15 +40,14 @@ constructor(
   private router: Router
 ) { }
 
-ngOnInit(): void {
-  const token = this.authService.getAccessTokenFromLocalStorage();
-  if (token) this.isLoggedIn = true;
-  else this.isLoggedIn = false;
-  this.route.paramMap.subscribe(params => {
-    this.chatId = params.get('id')!;
-  });
-}
-
+  ngOnInit(): void {
+    const token = this.authService.getAccessTokenFromLocalStorage();
+    if (token) this.isLoggedIn = true;
+    else this.isLoggedIn = false;
+    this.route.paramMap.subscribe(params => {
+      this.chatId = params.get('id')!;
+    });
+  }
 
   onSubmit() {
     const uuid = crypto.randomUUID();
@@ -60,6 +60,33 @@ ngOnInit(): void {
     // crete and initialize new chat page component
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
     this.router.navigate(['/chat', uuid]);
+  }
+
+  simulateTyping(response: string, responseIndex: number) {
+    let words = response.split(' ');
+    let currentWords = [];
+    let index = 0;
+    const wordsPerBatch = 5;
+    const typingSpeed = 300;
+    
+    const intervalId = setInterval(() => {
+      currentWords.push(...words.slice(index, index + wordsPerBatch));
+      this.botMessages[responseIndex] = currentWords.join(" ");
+      
+      this.cdRef.detectChanges();
+
+      index += wordsPerBatch;
+
+      if (index >= words.length) {
+        clearInterval(intervalId); 
+        this.thinking = false;
+      }
+    }, typingSpeed);
+  }
+
+  isSameAsLastPrompt(): boolean {
+
+    return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
   
   resizeInput(inputElement: HTMLTextAreaElement): void {
