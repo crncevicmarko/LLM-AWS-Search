@@ -16,7 +16,7 @@ import { AuthService } from '../services/auth.service';
 })
 export class ChatbotComponent implements OnInit{
   
-
+  isLoggedIn: boolean = false;
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -39,11 +39,15 @@ constructor(
   private router: Router
 ) { }
 
-  ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      this.chatId = params.get('id')!;
-    });
-  }
+ngOnInit(): void {
+  const token = this.authService.getAccessTokenFromLocalStorage();
+  if (token) this.isLoggedIn = true;
+  else this.isLoggedIn = false;
+  this.route.paramMap.subscribe(params => {
+    this.chatId = params.get('id')!;
+  });
+}
+
 
   onSubmit() {
     const uuid = crypto.randomUUID();
