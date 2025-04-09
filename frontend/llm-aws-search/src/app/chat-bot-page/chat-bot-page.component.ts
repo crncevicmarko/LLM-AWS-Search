@@ -144,10 +144,10 @@ constructor(
       //   - **ID: SCRUM-49 Reenviar la entrada del usuario a la función Lambda retrieveUserInput a través de una solicitud HTTP**
       //   Descripción: Como usuario, quiero enviar mi entrada (como un mensaje o datos) desde el frontend a una función Lambda de AWS a través de una solicitud HTTP, para que la función Lambda pueda procesar la entrada y devolver la respuesta adecuada que se mostrará en la interfaz de usuario.
       //   (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-49)`,
-      //   chat_id : this.chatId,
-      //   timestamp:1744008299,
-      // }
-      // ]
+        chat_id : this.chatId,
+         timestamp:1744008299,
+       }
+       ]
       this.chatService.getChatsById(this.chatId).subscribe({
         next: (res) => {
           this.chatHistory = res.messages
