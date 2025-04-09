@@ -6,7 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Chat } from '../models/chat.model';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
 
 
 @Component({
@@ -18,7 +17,7 @@ import { Router } from '@angular/router';
 
 export class ChatbotComponent implements OnInit{
   isLoggedIn: boolean = false;
-  
+
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -58,7 +57,7 @@ constructor(
     // Create the chat
     const newChat = this.chatCommunicationService.startNewChat(1, uuid);
     console.log("New Chat: ", newChat)
-  
+
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
     this.router.navigate(['/chat', uuid]);
   }
@@ -69,17 +68,17 @@ constructor(
     let index = 0;
     const wordsPerBatch = 5;
     const typingSpeed = 300;
-    
+
     const intervalId = setInterval(() => {
       currentWords.push(...words.slice(index, index + wordsPerBatch));
       this.botMessages[responseIndex] = currentWords.join(" ");
-      
+
       this.cdRef.detectChanges();
 
       index += wordsPerBatch;
 
       if (index >= words.length) {
-        clearInterval(intervalId); 
+        clearInterval(intervalId);
         this.thinking = false;
       }
     }, typingSpeed);
@@ -89,12 +88,12 @@ constructor(
 
     return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
-  
+
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
   resizeInput(inputElement: HTMLTextAreaElement): void {
-    
+
     inputElement.style.height = 'auto';
 
     inputElement.style.height = `${inputElement.scrollHeight}px`;
