@@ -10,8 +10,6 @@ export class ChatService{
     private chats: Chat[] = [];
     constructor(private http: HttpClient) { }
     apiHost: string=environment.apiUrl;
-    dinamoDBUrlGetChatHistory: string=environment.dinamoDBUrlGetChatHistory;
-    dinamoDBUrlPostChatHistory: string=environment.dinamoDBUrlPostChatHistory;
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json', 'Accept':'*/*'})
     recieveUserInput(query: any, chat_history: any): Observable<any>{
       console.log("Query: ",query);
@@ -33,7 +31,7 @@ export class ChatService{
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
 
-      return this.http.get(this.dinamoDBUrlGetChatHistory, {
+      return this.http.get(this.apiHost+ '/get-messages', {
         headers: this.headers,
         params,
         responseType: 'json'
@@ -48,7 +46,7 @@ export class ChatService{
         chat_message: chatMessage
       };
       console.log("Body: ", body)
-      console.log("Url: ", this.dinamoDBUrlPostChatHistory)
+      // console.log("Url: ", this.dinamoDBUrlPostChatHistory)
   
       return this.http.post<any>(this.apiHost+ '/save-message', body, {headers: this.headers});
     }
