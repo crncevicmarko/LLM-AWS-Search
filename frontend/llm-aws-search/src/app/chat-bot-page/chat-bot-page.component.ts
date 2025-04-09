@@ -7,6 +7,7 @@ import { Chat } from '../models/chat.model';
 import { timestamp } from 'rxjs';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
+// import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-chat-bot-page',
