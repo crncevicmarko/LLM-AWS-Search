@@ -52,3 +52,27 @@ do
   rm -rf "$PACKAGE_DIR"
 
 done < "$REQUIREMENTS_FILE"
+
+echo "Setting up Node.js layer with aws-jwt-verify..."
+NODE_LAYER_DIR="nodejs"
+NODE_ZIP_FILE="authorizer.zip"
+
+rm -rf "$NODE_LAYER_DIR" "$NODE_ZIP_FILE"
+
+mkdir -p "$NODE_LAYER_DIR"
+cd "$NODE_LAYER_DIR"
+
+npm init -y
+npm install aws-jwt-verify
+
+cd ..
+
+zip -r "$NODE_ZIP_FILE" "$NODE_LAYER_DIR" > /dev/null
+
+if [ $? -eq 0 ]; then
+  echo "Node.js Lambda layer package $NODE_ZIP_FILE created successfully."
+else
+  echo "Error creating Node.js zip file."
+fi
+
+rm -rf "$NODE_LAYER_DIR"
