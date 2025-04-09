@@ -15,17 +15,12 @@ export class ChatService{
       console.log("Query: ",query);
       console.log("Chat History: ",chat_history)
       const messageContent = query.message;
-      // const userMessage = {
-      //   chat_history: [],
-      //   user_input: messageContent
-      // };
       const userMessage = {
         user_input: messageContent,
-        chat_history:[]
+        chat_history: chat_history
       };
 
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
-        //return this.http.post<any>('https://i57eufjva2.execute-api.eu-west-1.amazonaws.com/prod/test-chatbot',userMessage, {headers: this.headers})
     }
 
     getChatsById(chat_id: string): Observable<any> {
