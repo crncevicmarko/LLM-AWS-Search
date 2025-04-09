@@ -31,7 +31,7 @@ export class ChatService{
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
     
-      return this.http.get(this.dinamoDBUrlGetChatHistory, {
+      return this.http.get(this.apiHost+ '/get-messages', {
         headers: this.headers,
         params,
         responseType: 'json'
@@ -48,7 +48,7 @@ export class ChatService{
       console.log("Body: ", body)
       console.log("Url: ", this.dinamoDBUrlPostChatHistory)
   
-      return this.http.post<any>(this.dinamoDBUrlPostChatHistory, body, {headers: this.headers});
+      return this.http.post<any>(this.apiHost+ '/save-message', body, {headers: this.headers});
     }
 
     private generateRandomName(length: number): string {
