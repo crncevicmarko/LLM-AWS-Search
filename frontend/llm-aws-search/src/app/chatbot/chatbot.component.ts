@@ -105,9 +105,6 @@ constructor(
     this.router.navigate(['login']);
   }
 
-  logOut(): void {
-    this.authService.signOut();
-    this.router.navigate(['login']);
-  }
+
 }
 
