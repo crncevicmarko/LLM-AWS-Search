@@ -17,7 +17,7 @@ import { AuthService } from '../services/auth.service';
 
 export class ChatbotComponent implements OnInit{
   isLoggedIn: boolean = false;
-  
+
   title = 'llm-aws-search';
 thinking: boolean=false;
 @ViewChild('chatBox') chatBox: ElementRef | undefined;
@@ -56,41 +56,12 @@ constructor(
     // create new chat in sidebar component
     const newChat = this.chatCommunicationService.startNewChat(1, uuid);
     console.log("New Chat: ", newChat)
-  
-    // crete and initialize new chat page component
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
     this.router.navigate(['/chat', uuid]);
   }
 
-  simulateTyping(response: string, responseIndex: number) {
-    let words = response.split(' ');
-    let currentWords = [];
-    let index = 0;
-    const wordsPerBatch = 5;
-    const typingSpeed = 300;
-    
-    const intervalId = setInterval(() => {
-      currentWords.push(...words.slice(index, index + wordsPerBatch));
-      this.botMessages[responseIndex] = currentWords.join(" ");
-      
-      this.cdRef.detectChanges();
-
-      index += wordsPerBatch;
-
-      if (index >= words.length) {
-        clearInterval(intervalId); 
-        this.thinking = false;
-      }
-    }, typingSpeed);
-  }
-
-  isSameAsLastPrompt(): boolean {
-
-    return this.userMessages[this.userMessages.length-1] === this.userInput;
-  }
-  
   resizeInput(inputElement: HTMLTextAreaElement): void {
-    
+
     inputElement.style.height = 'auto';
 
     inputElement.style.height = `${inputElement.scrollHeight}px`;
