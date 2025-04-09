@@ -219,17 +219,17 @@ constructor(
     
         console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
 
-        //ovde treba da se salje POST request do DINAMO-DB-a-------------------------------------------------
-        // this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
-        //   next: (response) => {
-        //     console.log('Message successfully saved to DynamoDB:', response);
-        //     alert("Data successfuly saved")
-        //   },
-        //   error: (err) => {
-        //     console.error('Failed to save message to DynamoDB:', err);
-        //     alert("Data is not successfuly saved"+ err)
-        //   }
-        // });
+        // ovde treba da se salje POST request do DINAMO-DB-a-------------------------------------------------
+        this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
+          next: (response) => {
+            console.log('Message successfully saved to DynamoDB:', response);
+            alert("Data successfuly saved")
+          },
+          error: (err) => {
+            console.error('Failed to save message to DynamoDB:', err);
+            alert("Data is not successfuly saved"+ err)
+          }
+        });
 
         this.saveChatHistoryLocally();
     
