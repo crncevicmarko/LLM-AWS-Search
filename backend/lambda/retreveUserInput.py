@@ -24,6 +24,7 @@ index = pc.Index(host=PINECONE_INDEX_NAME)
 
 def parsResponse(query_result: str):
     results = []
+    
     for match in query_result.get("matches", []):
         metadata = match.get("metadata", {})
         print("29 : ",metadata)
@@ -151,7 +152,7 @@ def format_prompt_for_llm(filtered_results, user_question, chat_history):
         f"- Start with a friendly introduction, showing enthusiasm and care for the user's request.\n"
         f"- List each relevant Jira ticket with:\n"
         f"  - Ticket Title\n"
-        f"  - Descriptio(A summary of description of the ticket's purpose and tasks)\n"
+        f"  - Description(A summary of description of the ticket's purpose and tasks)\n"
         f"  - A URL to the ticket (this is the most important part and **must always be included**).\n"
         f"- Conclude with a warm, thoughtful closing statement that reassures the user, encourages further questions, and expresses eagerness to help. Example:\n"
         f"  'I hope this helps! If you need more details or have any follow-up questions, feel free to ask. I'm always here to assist you in navigating Jira and finding the right information. Let me know how I can help further!'"
@@ -243,8 +244,8 @@ def handler(event, context):
         #MAIN AGENT
         search_results=main_agent(user_input,formatted_chat_history)
 
-        print(search_results)
-        if(search_results[0].get("text") == "Unknown"):
+        print("247: ",search_results)
+        if(search_results and search_results[0].get("text") == "Unknown"):
             prompt = generate_unknown_prompt(user_input, chat_history)
         else:
             prompt = format_prompt_for_llm(search_results, user_input, formatted_chat_history)
@@ -275,7 +276,7 @@ def intent_classifier(user_input):
     prompt= ("You are an assistant that helps classify user requests into categories.\n"
             f"""Classify the following user query into one of these categories: "metadata", "description", or "unknown".\n"""
             f"User query: {user_input}\n"
-            'First, check if the query is related to technology, software development, AWS services, Angular, programming, or IT systems.'
+            'First, check if the query is related to technology, software development, AWS services, Angular, programming,Jira , Pinecone , Bedrock or IT systems.'
             'If the query is not related to any of these, classify it as "unknown"'
             'If the query is related to any of these, classify it as one of metadata or description using following categories'
             f"""- "metadata" for queries asking for creator, assignee, or mentioning keywords such as (creator, assignee, id, created by, assigned to, creator's name, created on, reporter, owner)
@@ -329,7 +330,7 @@ def search_pinecone_metadata(query_vector, params):
         namespace="jira"
     )
 
-    print("Creator name : "+creator_name)
+    # print("Creator name : "+creator_name)
 
     result = parsResponse(query_result)
     return result
@@ -338,7 +339,7 @@ def search_pinecone_description(query_vector):
  
     query_result = index.query(
         vector=query_vector,
-        top_k=5,
+        top_k=3,
         include_metadata=True,
         filter=None, 
         namespace="jira"
@@ -353,7 +354,7 @@ def main_agent(user_input, chat_history):
 
     print(f"[main_agent] Intent category: {category}")
 
-    if "metadata" in categorys:
+    if "metadata" in category:
         print("316: "+ user_input)
         prompt_for_pinecone_query = format_prompt_for_pinecone(user_input)
         print("317 "+prompt_for_pinecone_query)

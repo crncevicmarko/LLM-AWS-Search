@@ -20,8 +20,8 @@ export class ChatService{
         chat_history:[]
       };
 
-        // return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
-        return this.http.post<any>('https://i57eufjva2.execute-api.eu-west-1.amazonaws.com/prod/test-chatbot',userMessage, {headers: this.headers})
+        return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
+        //return this.http.post<any>('https://i57eufjva2.execute-api.eu-west-1.amazonaws.com/prod/test-chatbot',userMessage, {headers: this.headers})
     }
 
     getChatsById(chat_id: string): Observable<any> {
