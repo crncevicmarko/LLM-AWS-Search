@@ -17,14 +17,14 @@ export class SidebarComponent {
   constructor(private chatService:ChatService, private chatCommunicationService: ChatCommunicationService,private authService:AuthService) {}
 
   ngOnInit(): void {
-    this.chatCommunicationService.getUserChats("hasuotbatuoasn").subscribe((chats: Chat[]) => {
+    this.chatCommunicationService.getUserChats(this.authService.getUserID()).subscribe((chats: Chat[]) => {
       this.chats = chats;
       console.log(this.chats);
     });
     console.log(this.chats)
     this.chatCommunicationService.newChat$.subscribe(res => {
       let chatArray: Chat[] = [];
-      this.chatCommunicationService.getUserChats("hasuotbatuoasn").subscribe((chats: Chat[]) => {
+      this.chatCommunicationService.getUserChats(this.authService.getUserID()).subscribe((chats: Chat[]) => {
         this.chats = chats;
         console.log(this.chats);
       });      /*
