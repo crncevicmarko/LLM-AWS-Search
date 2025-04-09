@@ -16,9 +16,13 @@ export class ChatService{
     recieveUserInput(query: any): Observable<any>{
       console.log(query);
       const messageContent = query.message;
+      // const userMessage = {
+      //   chat_history: [],
+      //   user_input: messageContent
+      // };
       const userMessage = {
+        text: messageContent,
         chat_history: [],
-        user_input: messageContent
       };
       
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})

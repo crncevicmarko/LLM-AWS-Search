@@ -40,6 +40,9 @@ exports.handler = async function (event) {
     const clientId = process.env.CLIENT_ID;
     console.log("Token: ", token);
 
+    console.log("UserpoolId: ", userPoolId);
+    console.log("clientID:", clientId);
+
     const verifier = CognitoJwtVerifier.create({
         userPoolId: userPoolId,
         tokenUse: "access",

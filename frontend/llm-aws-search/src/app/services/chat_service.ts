@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ReplaySubject, Subject } from 'rxjs';
 import { Chat } from '../models/chat.model';
+import { ChatService } from './chatbot.services';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class ChatCommunicationService {
   newChat$ = this.newChatSubject.asObservable();
   userInput$ = this.userInputSubject.asObservable();
 
-  constructor() {}
+  constructor(private chatbotService: ChatService) {}
 
   private generateRandomName(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
