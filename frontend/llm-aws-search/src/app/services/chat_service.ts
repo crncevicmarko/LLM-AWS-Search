@@ -9,7 +9,7 @@ export class ChatCommunicationService {
   private chats: Chat[] = [];
 
   // Subjects for communication
-  private newChatSubject = new ReplaySubject<Chat>();
+  private newChatSubject = new ReplaySubject();
   private userInputSubject = new ReplaySubject<{ input: string, chatId: string }>(1);
 
   newChat$ = this.newChatSubject.asObservable();
@@ -30,18 +30,19 @@ export class ChatCommunicationService {
   startNewChat(userId: number, uuid: string): Chat {
     console.log("usli u startNewChat")
     const randomName = this.generateRandomName(10);
-    const newChat: Chat = { id: uuid, name: randomName, userId };
+    const newChat: Chat = { id: uuid, name: "New Chat - "+randomName, userId };
     this.chats.push(newChat);
-    this.newChatSubject.next(newChat); // Notify sidebar
+    this.newChatSubject.next(newChat);
     return newChat;
   }
 
   getAllChats(): Chat[] {
+    // ovde ce da ide GET https koji ce da fecuje sve chatove i smestace ih u this.chats listu. mora tako zato sto je sidebar komponenta postavljena u chatbotpge componetnu, i kada se kreira refresuje ta stranica refersuje se i sidebar sto je no bueno.
     return this.chats;
   }
 
   sendUserInput(input: string, chatId: string) {
     console.log("Usli u send user input")
-    this.userInputSubject.next({ input, chatId }); // Notify ChatBotPageComponent
+    this.userInputSubject.next({ input, chatId });
   }
 }

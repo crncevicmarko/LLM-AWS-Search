@@ -11,17 +11,23 @@ export class ChatService{
     constructor(private http: HttpClient) { }
     apiHost: string=environment.apiUrl;
     dinamoDBUrlGetChatHistory: string=environment.dinamoDBUrlGetChatHistory;
+    dinamoDBUrlPostChatHistory: string=environment.dinamoDBUrlPostChatHistory;
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json', 'Accept':'*/*'})
-    recieveUserInput(query: any, chatHistory: any): Observable<any>{
+    recieveUserInput(query: any): Observable<any>{
       console.log(query);
       const messageContent = query.message;
       const userMessage = {
-        chat_history: chatHistory,
+        chat_history: [],
         user_input: messageContent
       };
       
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
     }
+    getUserChats(userId: string): Observable<Chat[]> {
+
+      return this.http.get<any[]>(`${this.apiHost}/chats-by-user?user_id=`+userId, { headers: this.headers })
+          
+  }
     
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
@@ -33,14 +39,19 @@ export class ChatService{
       });
     }
 
-    // getChatById(chat_id:any): Observable<any> {
-    //   const url = `${this.dinamoDBUrlGetChatHistory}${chat_id}`;
-    //   console.log("Url: ",url)
-    //   return this.http.get(url, {
-    //     headers: this.headers,
-    //     responseType: 'json'
-    //   });
-    // }
+    postNewChatMessage(user_id: string, chat_id: string, userMessage: string, chatMessage: string) {
+      const body = {
+        user_id: user_id,
+        chat_id: chat_id,
+        user_message: userMessage,
+        chat_message: chatMessage
+      };
+      console.log("Body: ", body)
+      console.log("Url: ", this.dinamoDBUrlPostChatHistory)
+  
+      return this.http.post<any>(this.dinamoDBUrlPostChatHistory, body, {headers: this.headers});
+    }
+
     private generateRandomName(length: number): string {
       const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
       let result = '';
@@ -58,5 +69,6 @@ export class ChatService{
       console.log(this.chats);
       return this.chats;
     }
+    
 
     }

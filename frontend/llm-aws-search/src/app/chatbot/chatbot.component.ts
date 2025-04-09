@@ -6,7 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Chat } from '../models/chat.model';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
 
 
 @Component({
@@ -52,13 +51,13 @@ constructor(
 
   onSubmit() {
     const uuid = crypto.randomUUID();
-    console.log("Usli u onSubmit")
     const userMessage = this.userInput;
-    console.log("User input: ", userMessage)
-    // Create the chat
+
+    // create new chat in sidebar component
     const newChat = this.chatCommunicationService.startNewChat(1, uuid);
     console.log("New Chat: ", newChat)
   
+    // crete and initialize new chat page component
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
     this.router.navigate(['/chat', uuid]);
   }
@@ -90,9 +89,6 @@ constructor(
     return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
   
-  ngAfterViewChecked(): void {
-    this.autoScroll();
-  }
   resizeInput(inputElement: HTMLTextAreaElement): void {
     
     inputElement.style.height = 'auto';
@@ -103,16 +99,12 @@ constructor(
       inputElement.style.height = '100px';
     }
   }
-  private autoScroll(): void {
-    const chatBoxElement = this.chatBox?.nativeElement;
-    if (chatBoxElement) {
-      chatBoxElement.scrollTop = chatBoxElement.scrollHeight;
-    }
-  }
 
   logOut(): void {
     this.authService.signOut();
     this.router.navigate(['login']);
   }
+
+
 }
 
