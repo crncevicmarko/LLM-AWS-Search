@@ -13,6 +13,7 @@ from aws_cdk import (
 )
 
 from constructs import Construct
+import shutil
 
 class BackendStack(Stack):
 
@@ -136,7 +137,6 @@ class BackendStack(Stack):
         #     cognito_user_pools=[user_pool]
         # )
  
-
         def create_lambda_function(id, handler, include_dir, method, layers, environment):
             function = _lambda.Function(
                 self, id,
@@ -194,8 +194,8 @@ class BackendStack(Stack):
         get_user_input_lambda_func = _lambda.Function(
             self, "TestLambdaFunction",
             runtime=_lambda.Runtime.PYTHON_3_9,
-            layers=[pinecone_layer],
             handler="retreveUserInput.handler",
+            layers=[pinecone_layer],
             code=_lambda.Code.from_asset("lambda"),
             role=lambda_role,
             memory_size=512, 

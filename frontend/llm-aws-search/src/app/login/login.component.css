@@ -8,6 +8,7 @@
 }
 
 .login-container {
+  height: 70%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -39,7 +40,7 @@
     margin-top: 30px;
     display: flex;
     flex-direction: column;
-    padding: 0px 50px 20px 50px;
+    padding: 0px 50px 0px 50px;
   }
   .input-field{
     width:250px;
@@ -50,7 +51,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-top: 20px; 
   }
  
 
@@ -79,4 +79,11 @@
     color: #fc0bd3;
     font-weight: 700;
     cursor: pointer;
+  }
+  .validator-message{
+    height: 30px;
+  }
+
+  .validator-message > div{
+    color: #fc0bd3;
   }

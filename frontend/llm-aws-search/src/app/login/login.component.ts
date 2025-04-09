@@ -17,6 +17,8 @@ export class LoginComponent {
   @ViewChild('usernameInput') usernameInput!: ElementRef;
   @ViewChild('passwordInput') passwordInput!: ElementRef;
 
+  loginValidator: boolean = false;
+
   loginForm = new FormGroup({
     username: new FormControl(),
     password: new FormControl()
@@ -52,7 +54,8 @@ export class LoginComponent {
       };
 
       const cognitoUser = new CognitoUser(userData);
-
+      this.loginValidator = false;
+      
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (result) => {
           console.log('Login successful:', result);
@@ -76,7 +79,7 @@ export class LoginComponent {
           });
         },
         onFailure: (err) => {
-          console.error('Login failed:', err);
+          this.loginValidator = true;
         }
       });
     }

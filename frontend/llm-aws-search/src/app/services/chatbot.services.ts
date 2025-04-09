@@ -10,22 +10,22 @@ export class ChatService{
     private chats: Chat[] = [];
     constructor(private http: HttpClient) { }
     apiHost: string=environment.apiUrl;
-    dinamoDBUrlGetChatHistory: string=environment.dinamoDBUrlGetChatHistory;
-    dinamoDBUrlPostChatHistory: string=environment.dinamoDBUrlPostChatHistory;
     headers: HttpHeaders = new HttpHeaders({ 'Content-Type' : 'application/json', 'Accept':'*/*'})
-    recieveUserInput(query: any): Observable<any>{
-      console.log(query);
+    recieveUserInput(query: any, chat_history: any): Observable<any>{
+      console.log("Query: ",query);
+      console.log("Chat History: ",chat_history)
       const messageContent = query.message;
       // const userMessage = {
       //   chat_history: [],
       //   user_input: messageContent
       // };
       const userMessage = {
-        text: messageContent,
-        chat_history: [],
+        user_input: messageContent,
+        chat_history:[]
       };
-      
+
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
+        //return this.http.post<any>('https://i57eufjva2.execute-api.eu-west-1.amazonaws.com/prod/test-chatbot',userMessage, {headers: this.headers})
     }
     getUserChats(userId: string): Observable<Chat[]> {
 
@@ -35,8 +35,8 @@ export class ChatService{
     
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
-    
-      return this.http.get(this.dinamoDBUrlGetChatHistory, {
+
+      return this.http.get(this.apiHost+ '/get-messages', {
         headers: this.headers,
         params,
         responseType: 'json'
@@ -51,9 +51,9 @@ export class ChatService{
         chat_message: chatMessage
       };
       console.log("Body: ", body)
-      console.log("Url: ", this.dinamoDBUrlPostChatHistory)
+      // console.log("Url: ", this.dinamoDBUrlPostChatHistory)
   
-      return this.http.post<any>(this.dinamoDBUrlPostChatHistory, body, {headers: this.headers});
+      return this.http.post<any>(this.apiHost+ '/save-message', body, {headers: this.headers});
     }
 
     private generateRandomName(length: number): string {

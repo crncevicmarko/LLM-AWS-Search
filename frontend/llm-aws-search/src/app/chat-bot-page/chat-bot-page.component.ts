@@ -32,6 +32,7 @@ chatHistory: any;
 chatPairs: { user: string, bot: string, timestamp: string }[] = [];
 private initialized = false;
 user_id = "";
+chat_history: any;
 constructor(
   private chatService: ChatService,
   private chatCommunicationService: ChatCommunicationService,
@@ -140,36 +141,31 @@ constructor(
         Descripción: Desarrollar e implementar una función Lambda de AWS ({{GetTickets}}) para recuperar tickets de Jira de una instancia de Jira especificada a través de la API REST de Jira.
         (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-48)
 
-        - **ID: SCRUM-49 Reenviar la entrada del usuario a la función Lambda retrieveUserInput a través de una solicitud HTTP**
-        Descripción: Como usuario, quiero enviar mi entrada (como un mensaje o datos) desde el frontend a una función Lambda de AWS a través de una solicitud HTTP, para que la función Lambda pueda procesar la entrada y devolver la respuesta adecuada que se mostrará en la interfaz de usuario.
-        (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-49)`,
-        chat_id : this.chatId,
-        timestamp:1744008299,
-      }
-      ]
-      // this.chatService.getChatsById(this.chatId).subscribe({
-      //   next: (res) => {
-      //     this.chatHistory = res.messages
-      //     console.log("CHAT HISTORY: ",res.messages)
-      //     this.chatPairs = this.chatHistory.map((chat: any) => ({
-      //         user: chat.user_message,
-      //         bot: chat.chat_message,
-      //         timestamp: new Date(chat.timestamp * 1000).toLocaleTimeString()
-      //     }));
-      //     console.log("CHAT PAIRS: ", this.chatPairs)
-      //   },
-      //   error: err => {
-      //     alert("Error getting bot response")
-      //     console.error("Error getting bot response:", err);
-      //     this.thinking = false;
-      //   }
-      // });
-      this.chatPairs = this.chatHistory.map((chat: any) => ({
-        user: chat.user_message,
-        bot: chat.chat_message,
-        timestamp: new Date(chat.timestamp * 1000).toLocaleTimeString()
-      }));
-      this.saveChatHistoryLocally();
+      //   - **ID: SCRUM-49 Reenviar la entrada del usuario a la función Lambda retrieveUserInput a través de una solicitud HTTP**
+      //   Descripción: Como usuario, quiero enviar mi entrada (como un mensaje o datos) desde el frontend a una función Lambda de AWS a través de una solicitud HTTP, para que la función Lambda pueda procesar la entrada y devolver la respuesta adecuada que se mostrará en la interfaz de usuario.
+      //   (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-49)`,
+      //   chat_id : this.chatId,
+      //   timestamp:1744008299,
+      // }
+      // ]
+      this.chatService.getChatsById(this.chatId).subscribe({
+        next: (res) => {
+          this.chatHistory = res.messages
+          console.log("CHAT HISTORY: ",res.messages)
+          this.chatPairs = this.chatHistory.map((chat: any) => ({
+              user: chat.user_message,
+              bot: chat.chat_message,
+              timestamp: new Date(chat.timestamp * 1000).toLocaleTimeString()
+          }));
+          console.log("CHAT PAIRS: ", this.chatPairs)
+          this.saveChatHistoryLocally();
+        },
+        error: err => {
+          alert("Error getting bot response")
+          console.error("Error getting bot response:", err);
+          this.thinking = false;
+        }
+      });
     }
   }
   // cuva istoriju i nove vrednosti u local storage ili cash
@@ -206,8 +202,26 @@ constructor(
       timestamp: currentTime
     });
   
-    // Make the API call to get the bot's response
-    this.chatService.recieveUserInput({ message: userMsg }).subscribe(res => {
+    const storedChat = sessionStorage.getItem(this.chatId);
+
+    let formattedChatHistory: any[] = [];
+
+    if (storedChat && storedChat.trim() !== "") {
+      try {
+        const parsed = JSON.parse(storedChat);
+        if (parsed.chatPairs && Array.isArray(parsed.chatPairs)) {
+          formattedChatHistory = parsed.chatPairs.map((pair: any) => ({
+            user_message: pair.user,
+            chat_message: pair.bot
+          }));
+        }
+      } catch (e) {
+        console.error("Error parsing sessionStorage: ", e);
+        formattedChatHistory = [];
+      }
+    }
+
+    this.chatService.recieveUserInput({ message: userMsg }, formattedChatHistory).subscribe(res => {
       const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
@@ -219,17 +233,17 @@ constructor(
     
         console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
 
-        //ovde treba da se salje POST request do DINAMO-DB-a-------------------------------------------------
-        // this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
-        //   next: (response) => {
-        //     console.log('Message successfully saved to DynamoDB:', response);
-        //     alert("Data successfuly saved")
-        //   },
-        //   error: (err) => {
-        //     console.error('Failed to save message to DynamoDB:', err);
-        //     alert("Data is not successfuly saved"+ err)
-        //   }
-        // });
+        // ovde treba da se salje POST request do DINAMO-DB-a-------------------------------------------------
+        this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
+          next: (response) => {
+            console.log('Message successfully saved to DynamoDB:', response);
+            alert("Data successfuly saved")
+          },
+          error: (err) => {
+            console.error('Failed to save message to DynamoDB:', err);
+            // alert("Data is not successfuly saved"+ err)
+          }
+        });
 
         this.saveChatHistoryLocally();
     
