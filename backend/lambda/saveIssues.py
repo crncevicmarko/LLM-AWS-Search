@@ -6,6 +6,7 @@ from requests.auth import HTTPBasicAuth
 import os
 from pinecone import Pinecone
 from models import IssueVector
+from datetime import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -20,6 +21,10 @@ def get_secret(secret_arn):
     except Exception as e:
         logger.error(f"Error retrieving secret: {e}")
         raise
+
+def format_datetime(date_str: str) -> str:
+    dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
+    return dt.strftime("%Y.%m.%d - %H:%M")
 
 bedrock_runtime = boto3.client("bedrock-runtime")
 secret_arn = os.getenv("PINECONE_SECRET_ARN")
@@ -132,7 +137,16 @@ def format_and_insert_issues(issues_data, comments_data):
 
         try:
             embedding = generate_text_embedding(issue_text_sum)
-            issue_vector = IssueVector(text_id, embedding, issue.get('key'), issue_text_sum, fields.get('creator', {}).get('displayName', ''), base_url + issue["key"] )
+            issue_vector = IssueVector(text_id,
+                embedding, 
+                issue.get('key').lower(), 
+                issue_text_sum.lower(), 
+                fields.get('creator', {}).get('displayName', '').lower(),
+                fields.get('assignee',{}).get('displayName', '').lower(),
+                format_datetime(fields.get('created', '')),
+                format_datetime(fields.get('updated', '')),
+                fields.get('status',{}).get('name','').lower(),
+                base_url + issue["key"] )
 
             issue_vector.set_embedding(embedding=embedding)
 

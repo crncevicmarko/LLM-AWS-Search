@@ -1,7 +1,5 @@
 from aws_cdk import (
     aws_secretsmanager as secretsmanager,
-    aws_bedrock as bedrock,
-    RemovalPolicy, 
     Duration,
     aws_apigateway as apigateway,
     Stack,
@@ -76,16 +74,11 @@ class BackendStack(Stack):
                 "CLIENT_ID" : user_pool_client.user_pool_client_id, 
             }
         )
-        # authorizer = apigateway.TokenAuthorizer(
-        #     self, "MovieAppAuthorizer",
-        #     handler=auth_lambda
-        # )
 
         lambda_authorizer = apigateway.TokenAuthorizer(
             self, 
             "LambdaAuthorizer",  
             handler=auth_lambda, 
-            # identity_source=apigateway.IdentitySource.header("Authorization"),  
         )
         
         self.api = apigateway.RestApi(
@@ -95,7 +88,7 @@ class BackendStack(Stack):
                 description="API for an AI chatbot retrieving data from Jira.",
                 endpoint_types=[apigateway.EndpointType.REGIONAL], 
                 default_cors_preflight_options={
-                    "allow_origins": ["http://localhost:4200"],
+                    "allow_origins": ["http://localhost:4200","https://dlg9vobdrudc.cloudfront.net"],
                     "allow_methods": apigateway.Cors.ALL_METHODS,  
                     "allow_headers": ["*"],
                     "allow_credentials": True  
@@ -131,11 +124,6 @@ class BackendStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
         )
 
-        
-        # authorizer = apigateway.CognitoUserPoolsAuthorizer(
-        #     self, "JiraCognitoAuthorizer",
-        #     cognito_user_pools=[user_pool]
-        # )
  
         def create_lambda_function(id, handler, include_dir, method, layers, environment):
             function = _lambda.Function(
@@ -202,7 +190,7 @@ class BackendStack(Stack):
             timeout=Duration.seconds(60),
             environment={  
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
-                "PINECONE_INDEX_URL": PINECONE_INDEX_URL
+                "PINECONE_INDEX_URL": PINECONE_INDEX_URL,
             }
         )
 
