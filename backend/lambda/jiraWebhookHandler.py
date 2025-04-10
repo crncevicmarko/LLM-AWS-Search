@@ -4,6 +4,7 @@ import os
 import logging
 from pinecone import Pinecone
 from models import IssueVector
+from datetime import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,7 +20,9 @@ def get_secret(secret_arn):
     except Exception as e:
         logger.error(f"Error retrieving secret: {str(e)}", exc_info=True)
         raise
-
+def format_datetime(date_str: str) -> str:
+    dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
+    return dt.strftime("%Y.%m.%d - %H:%M")
 # 
 pinecone_secret_arn = os.getenv("PINECONE_SECRET_ARN")
 secrets = get_secret(pinecone_secret_arn)
@@ -64,13 +67,19 @@ def lambda_handler(event, context):
         if not issue:
             logger.warning("Invalid event data - missing issue.")
             return {"statusCode": 400, "body": "Invalid event data - missing issue"}
-
+        if fields['issuetype']['subtask']:
+            return {"statusCode": 400, "body": "Invalid event data - missing issue"}
+        
+        fields = issue['fields']
         issue_id = issue["id"]
         issue_key = issue["key"]
         summary = issue["fields"].get("summary", "")
         description = issue["fields"].get("description", "")
-        creator = issue["fields"].get("creator", {}).get("displayName", "")
-
+        creator = issue["fields"].get("creator", {}).get("displayName", "").lower()
+        assignee = fields.get('assignee',{}).get('displayName', '').lower(),
+        time_created = format_datetime(fields.get('created', '')),
+        time_updated = format_datetime(fields.get('updated', '')),
+        status = fields.get('status',{}).get('name','').lower()
         base_url = "https://jiralevi9internship2025.atlassian.net/browse/"
         issue_text_sum = f"{summary}\n{description}{issue_key} creator: {creator}"
 
@@ -81,7 +90,7 @@ def lambda_handler(event, context):
         logger.info(f"Processing issue with ID: {text_id}")
         embedding = generate_embedding(issue_text_sum)
 
-        issue_vector = IssueVector(text_id, embedding, issue_text_sum, base_url + issue_key)
+        issue_vector = IssueVector(text_id, embedding, issue_key, issue_text_sum, creator, assignee, time_created, time_updated, status, base_url + issue_key)
 
         logger.info(f"Event type received: {event_type}")
 

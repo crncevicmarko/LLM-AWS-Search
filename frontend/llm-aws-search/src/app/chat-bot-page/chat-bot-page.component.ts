@@ -160,7 +160,6 @@ constructor(
           this.saveChatHistoryLocally();
         },
         error: err => {
-          alert("Error getting bot response")
           console.error("Error getting bot response:", err);
           this.thinking = false;
         }
@@ -232,31 +231,39 @@ constructor(
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
     
-      if (this.chatPairs[responseIndex]) {
+      if (!this.chatPairs[responseIndex]) {
+        this.chatPairs[responseIndex] = {
+          user: userMsg,
+          bot: this.newValue,
+          timestamp: new Date().toLocaleTimeString()
+        };
+      } else {
         this.chatPairs[responseIndex].user = userMsg;
         this.chatPairs[responseIndex].bot = this.newValue;
         this.chatPairs[responseIndex].timestamp = new Date().toLocaleTimeString();
-    
-        console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
-
-        // ovde treba da se salje POST request do DINAMO-DB-a-------------------------------------------------
-        this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
-          next: (response) => {
-            console.log('Message successfully saved to DynamoDB:', response);
-          },
-          error: (err) => {
-            console.error('Failed to save message to DynamoDB:', err);
-            // alert("Data is not successfuly saved"+ err)
-          }
-        });
-
-        this.saveChatHistoryLocally();
-    
-        this.simulateTyping(parsedResponse, responseIndex);
       }
     
+      console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
+    
+      this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
+        next: (response) => {
+          console.log('Message successfully saved to DynamoDB:', response);
+        },
+        error: (err) => {
+          console.error('Failed to save message to DynamoDB:', err);
+        }
+      });
+    
+      this.saveChatHistoryLocally();
+      this.simulateTyping(parsedResponse, responseIndex);
+    
       console.log("Updated newValue after response: ", this.newValue);
-    });
+    },
+    (error) => {
+      this.thinking = false;
+      this.chatPairs[responseIndex].bot = "⚠️ Too many requests! You're sending questions too quickly. Please wait a moment before asking again so the system can respond properly."
+      }
+    );
   }
 
   
