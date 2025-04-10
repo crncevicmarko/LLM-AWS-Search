@@ -31,10 +31,7 @@ typingSpeed: number = 50;
 chatId: string = '';
 chat: any;
 constructor(
-  private chatService: ChatService,
   private chatCommunicationService: ChatCommunicationService,
-  private cdRef: ChangeDetectorRef,
-  private mdComp:MarkdownDisplayComponent,
   private route: ActivatedRoute,
   private authService: AuthService,
   private router: Router

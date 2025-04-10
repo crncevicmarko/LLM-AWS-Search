@@ -148,6 +148,7 @@ constructor(
           }));
           console.log("CHAT PAIRS: ", this.chatPairs)
           this.saveChatHistoryLocally();
+          // this.chatCommunicationService.triggerSidebarRefresh();
         },
         error: err => {
           alert("Error getting bot response")
@@ -204,7 +205,6 @@ constructor(
     this.userInput = ""; // obrisemo user text iz input polja kada se posalje zahtev
     this.thinking = true;
 
-    // treba da se samo kreira novi zahtev koji ce da se sacuva u
     const formattedChatHistory = this.getFormattedChatHistory();
 
     this.chatService.recieveUserInput({ message: userMsg }, formattedChatHistory).subscribe(res => {
@@ -229,6 +229,7 @@ constructor(
       this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
         next: (response) => {
           console.log('Message successfully saved to DynamoDB:', response);
+          this.chatCommunicationService.triggerSidebarRefresh();
         },
         error: (err) => {
           console.error('Failed to save message to DynamoDB:', err);
@@ -273,12 +274,14 @@ constructor(
       this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
         next: (response) => {
           console.log('Message successfully saved to DynamoDB:', response);
+          this.chatCommunicationService.triggerSidebarRefresh();
         },
         error: (err) => {
           console.error('Failed to save message to DynamoDB:', err);
         }
       });
-    
+      console.log("Poslednja vrednost koja ce da se prosledi u sessiju: ",this.chatPairs[responseIndex].bot)
+      
       this.saveChatHistoryLocally();
     
       console.log("Updated newValue after response: ", this.newValue);

@@ -1,5 +1,5 @@
 export const environment = {
-    userPoolId:"eu-west-1_oZ2KyuGfa",
-    userPoolClientId:"14nim0hkscne1u1bg2njckv9km"
+    userPoolId:"eu-west-1_n9gwGDa9m",
+    userPoolClientId:"aeiv6iipl7grttkskkkquc6gr"
   }
   
