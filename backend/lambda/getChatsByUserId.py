@@ -39,7 +39,8 @@ def handler(event, context):
             "headers": {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
-                "Access-Control-Allow-Headers": "Content-Type, Authorization"
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+
             },
             "body": json.dumps({"response": chats})
         }
@@ -48,5 +49,12 @@ def handler(event, context):
         logger.exception("Error querying DynamoDB")
         return {
             "statusCode": 500,
+             "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+
+            },
             "body": json.dumps({"error": str(e)})
         }
+

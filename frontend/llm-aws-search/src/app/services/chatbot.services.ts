@@ -30,12 +30,13 @@ export class ChatService{
     
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
-
+/*
       return this.http.get(this.apiHost+ '/get-messages', {
         headers: this.headers,
         params,
         responseType: 'json'
-      });
+      });*/
+      return new Observable;
     }
 
     postNewChatMessage(user_id: string, chat_id: string, userMessage: string, chatMessage: string) {
@@ -68,6 +69,5 @@ export class ChatService{
       console.log(this.chats);
       return this.chats;
     }
-    
 
     }

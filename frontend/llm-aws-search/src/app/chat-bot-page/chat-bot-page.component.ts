@@ -45,11 +45,15 @@ constructor(
 
   ngOnInit(): void {
     //user authentification for this page
+    
     this.userAuthData();
 
     // ako je udjeno u drugi chat ili refresovana stranica trebala bi da se loduje cela istorija ponovo.
     this.sessionRefresh();
-
+        if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
+        {
+          
+        }
     this.route.paramMap.subscribe(params => {
       console.log("Usli u onInit u ChatBotPageComponent 1");
       this.chatId = params.get('id');
@@ -83,7 +87,6 @@ constructor(
   sessionRefresh():void{
     sessionStorage.clear();
   }
-
   loadChatData(): void {
     // const storedChatHistory = localStorage.getItem(`chat-${this.chatId}`);
     // if (!this.chatPairs || this.chatPairs.length === 0) {
@@ -186,11 +189,19 @@ constructor(
       alert('Your input is the same as the last prompt. Please enter something different.');
       return;
     }
-  
+
     const userMsg = this.userInput;
     this.userInput = "";
     this.thinking = true;
-    
+     if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
+      {
+        console.log("new chat postoji");
+        this.chatCommunicationService.saveChat(this.user_id,userMsg,this.chatId).subscribe();
+        console.log("refresujem");
+        this.chatCommunicationService.refreshPage();
+        alert("Please refresh the page.");
+
+      }
     const currentTime = new Date().toLocaleTimeString();
     const responseIndex = this.chatPairs.length;
   
@@ -242,7 +253,7 @@ constructor(
             console.error('Failed to save message to DynamoDB:', err);
             // alert("Data is not successfuly saved"+ err)
           }
-        });
+        }); 
 
         this.saveChatHistoryLocally();
     
@@ -251,7 +262,9 @@ constructor(
     
       console.log("Updated newValue after response: ", this.newValue);
     });
-  }
+   
+          
+      }
 
   
 

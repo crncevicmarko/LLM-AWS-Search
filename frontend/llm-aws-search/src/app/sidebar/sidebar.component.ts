@@ -3,6 +3,8 @@ import { Chat } from '../models/chat.model';
 import { ChatService } from '../services/chatbot.services';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-sidebar',
@@ -13,39 +15,62 @@ import { AuthService } from '../services/auth.service';
 export class SidebarComponent {
   // Array of chat objects (you can fetch this from an API or service)
   chats:Chat[]=[];
+  user_id: any;
+  isLoggedIn: boolean = false
 
-  constructor(private chatService:ChatService, private chatCommunicationService: ChatCommunicationService,private authService:AuthService) {}
+  constructor(private chatService:ChatService, private chatCommunicationService: ChatCommunicationService,private authService:AuthService,private router:Router) {}
 
   ngOnInit(): void {
-    this.chatCommunicationService.getUserChats(this.authService.getUserID()).subscribe((chats: Chat[]) => {
+    this.userAuthData();
+    /*this.chatCommunicationService.getUserChats(this.authService.getUserID()).subscribe((chats: Chat[]) => {
       this.chats = chats;
       console.log(this.chats);
+    });*/
+ 
+    this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+      this.chats=chats;
     });
+    console.log(this.user_id)
     console.log(this.chats)
+    //console.log(this.chatCommunicationService.getAllChats(this.user_id))
     this.chatCommunicationService.newChat$.subscribe(res => {
-      let chatArray: Chat[] = [];
-      this.chatCommunicationService.getUserChats(this.authService.getUserID()).subscribe((chats: Chat[]) => {
-        this.chats = chats;
-        console.log(this.chats);
-      });      /*
-        this.chatCommunicationService.newChat$.subscribe(res => {
-///       ZAMENITI SA PRAVIM USEROM
-//       let chatArray: Chat[] = [];
-
-      this.chatCommunicationService.getUserChats(this.authService.getUserID()
-        ).subscribe((chats: Chat[]) => {
-        chatArray = chats;
-        console.log(chatArray);  // Now you have the Chat[] in chatArray
+      this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+        this.chats=chats;
       });
-      */
     });
+
+    this.chatCommunicationService.refreshPage$.subscribe(res=>{
+      alert("Please refresh the page.");
+
+      });
+    
+  }
+
+  userAuthData():void {
+    const token = this.authService.getAccessTokenFromLocalStorage();
+    console.log("Token: ", token)
+    this.user_id = this.authService.getUserID();
+    if (token) this.isLoggedIn = true;
+    else this.isLoggedIn = false;
   }
   addChat()
   {
     const uuid = crypto.randomUUID();
     console.log("UUID: ",uuid) 
     // ovo bi trebalo da kreira novi chat ali u chatCommunicationService-u i da ih tamo skadisti
-    this.chats.push(this.chatCommunicationService.startNewChat(1, uuid));
     // ovo bi trebalo da izvuce te chatove iz tog servisa i da ih displajuje kod sebe
+   /* this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+      console.log("Chats received:", chats);
+      this.chats=chats;
+    });  */
+    console.log(this.chats)
+    this.chats=    this.chatCommunicationService.startNewChat(this.user_id, uuid);
+    console.log(this.chats);  
+    this.router.navigate(['chat/', uuid]);
+
   }
+  refresh(){
+    this.chatCommunicationService.refreshPage$.subscribe()
+  }
+
 }

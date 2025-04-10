@@ -307,6 +307,17 @@ class BackendStack(Stack):
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
 
+        get_title_by_id_lambda = create_lambda_function(
+            "GetTitleByIdLambda",
+            "getChatTitles.handler",  
+            "lambda",  
+            "GET",  
+            [],  
+            {
+                "TABLE_NAME": chat_titles.table_name  
+            }
+        )
+
 
         save_message_resource = self.api.root.add_resource("save-message")
         save_message_resource.add_method(
@@ -339,16 +350,16 @@ class BackendStack(Stack):
 
         self.api.root.add_resource("generate-title").add_method("POST", title_generation_integration)
 
-        get_title_by_id_lambda = create_lambda_function(
-            "GetTitleByIdLambda",
-            "getChatTitles.handler",  
-            "lambda",  
-            "GET",  
-            [],  
-            {
-                "TABLE_NAME": chat_titles.table_name  
-            }
-        )
+        # get_title_by_id_lambda = create_lambda_function(
+        #     "GetTitleByIdLambda",
+        #     "getChatTitles.handler",  
+        #     "lambda",  
+        #     "GET",  
+        #     [],  
+        #     {
+        #         "TABLE_NAME": chat_titles.table_name  
+        #     }
+        # )
 
         chat_titles.grant_read_data(get_title_by_id_lambda)
 
@@ -367,12 +378,37 @@ class BackendStack(Stack):
             environment={
                 "TABLE_NAME": chat_titles.table_name  # Use the correct table here
             }
-        )
+        )       
 
         chat_titles.grant_read_data(get_chats_by_userid)
 
+        get_chats_by_userid.add_to_role_policy(
+            statement=iam.PolicyStatement(
+                actions=["logs:*", "dynamodb:Scan"],  
+                resources=["*"]  
+            )
+        )
 
-        get_chats_by_userid_integration = apigateway.LambdaIntegration(get_chats_by_userid)
 
-        self.api.root.add_resource("chats-by-user").add_method("GET", get_chats_by_userid_integration)
 
+        # get_chats_by_userid_integration = apigateway.LambdaIntegration(get_chats_by_userid)
+
+        # self.api.root.add_resource("chats-by-user").add_cors_preflight(
+        # allow_origins=["*"],  # This is the allowed origin (change it if needed)
+        # allow_methods=["GET", "POST", "PUT", "DELETE"],  # Allowed HTTP methods
+        # allow_headers=["Content-Type", "Authorization"],  # Allowed headers
+        # max_age=Duration.days(1)  # Cache preflight response for 1 day
+        # ).add_method("GET",get_chats_by_userid_integration)
+
+        get_chat_history_resource = self.api.root.add_resource("chats-by-user")
+        get_chat_history_resource.add_method(
+            "GET", apigateway.LambdaIntegration(get_chats_by_userid),
+            authorization_type=apigateway.AuthorizationType.CUSTOM,
+            authorizer=lambda_authorizer
+        )
+ 
+
+        # Create the resource for 'chats-by-user'
+        # self.api.root.add_resource("chats-by-user").add_method("GET", get_chats_by_userid_integration)
+
+        
