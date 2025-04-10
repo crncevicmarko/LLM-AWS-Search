@@ -47,6 +47,9 @@ class BackendStack(Stack):
             self, "JiraUserPoolClient",
             user_pool=user_pool,
             generate_secret=False,  
+            id_token_validity=Duration.hours(2),          
+            access_token_validity=Duration.hours(2),      
+            refresh_token_validity=Duration.days(30),
             auth_flows=cognito.AuthFlow(
                 user_password=True,  
                 user_srp=True  
@@ -65,7 +68,7 @@ class BackendStack(Stack):
         )
 
         auth_lambda = _lambda.Function(self, "AuthLambda",
-            code=_lambda.Code.from_asset("lambda"),
+            code=_lambda.Code.from_asset("lambda/authentication"),
             handler="auth.handler",  
             runtime=_lambda.Runtime.NODEJS_18_X,
             layers=[authorizer_layer],
@@ -142,7 +145,7 @@ class BackendStack(Stack):
         register_user_lambda_function=create_lambda_function(
             "Register",
             "register.handler",
-            "lambda",
+            "lambda/register",
             "POST",
             [request_layer],
             {
@@ -154,7 +157,7 @@ class BackendStack(Stack):
         email_confirmation=create_lambda_function(
             "ConfirmEmail",
             "confirmation.handler",
-            "lambda",
+            "lambda/confirmation",
             "POST",
             [request_layer],
             {
@@ -166,7 +169,7 @@ class BackendStack(Stack):
         save_issues = create_lambda_function(
             "SaveIssues",  
             "saveIssues.handler",  
-            "lambda",  
+            "lambda/saveIssues",  
             "GET",  
             [request_layer, pinecone_layer],
             {
@@ -180,11 +183,11 @@ class BackendStack(Stack):
         )
 
         get_user_input_lambda_func = _lambda.Function(
-            self, "TestLambdaFunction",
+            self, "RetrieveUserInput",
             runtime=_lambda.Runtime.PYTHON_3_9,
-            handler="retreveUserInput.handler",
+            handler="retrieveUserInput.handler",
             layers=[pinecone_layer],
-            code=_lambda.Code.from_asset("lambda"),
+            code=_lambda.Code.from_asset("lambda/retrieveUserInput"),
             role=lambda_role,
             memory_size=512, 
             timeout=Duration.seconds(60),
@@ -213,23 +216,12 @@ class BackendStack(Stack):
                                    iam.ManagedPolicy.from_aws_managed_policy_name("AmazonBedrockFullAccess"),
                                    iam.ManagedPolicy.from_aws_managed_policy_name("SecretsManagerReadWrite") 
                                ])
-        
-        setPineconeDB = create_lambda_function(
-            "SetPineconeDB",
-            "setPineconeDB.handler",
-            "lambda",
-            "PUT",
-            [pinecone_layer],
-            {
-                "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
-            }
-        )
 
 
         jiraWebHookFunction = create_lambda_function(
             "jiraWebhookFunction",
             "jiraWebhookHandler.handler",
-            "lambda",
+            "lambda/jiraWebHook",
             "POST",
             [pinecone_layer,request_layer],
             {
@@ -273,7 +265,7 @@ class BackendStack(Stack):
         save_message_lambda = create_lambda_function(
             "SaveChatMessageLambda",
             "saveChatMessage.handler",
-            "lambda",
+            "lambda/saveChatMessage",
             "POST",
             [],
             {
@@ -285,7 +277,7 @@ class BackendStack(Stack):
         get_messages_by_id = create_lambda_function(
             "getChatLambda",
             "getMessagesByChatId.handler",
-            "lambda",
+            "lambda/getMessagesByChat",
             "GET",
             [],
             {
@@ -313,7 +305,7 @@ class BackendStack(Stack):
             self, "TitleGenerationLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="generateTitle.handler",
-            code=_lambda.Code.from_asset("lambda"),
+            code=_lambda.Code.from_asset("lambda/generateTitle"),
             memory_size=512,
             timeout=Duration.seconds(60),
             environment={
@@ -330,7 +322,7 @@ class BackendStack(Stack):
         get_title_by_id_lambda = create_lambda_function(
             "GetTitleByIdLambda",
             "getChatTitles.handler",  
-            "lambda",  
+            "lambda/getChatTitles",  
             "GET",  
             [],  
             {
