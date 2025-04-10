@@ -1,4 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+a {
+    color: #fc0bd3;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+  }
+  
+a:hover {
+    color: #feb3ed;
+    text-shadow: 0 0 6px #fd80e4;
+  }
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

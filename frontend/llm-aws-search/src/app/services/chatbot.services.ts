@@ -40,9 +40,7 @@ export class ChatService{
         user_message: userMessage,
         chat_message: chatMessage
       };
-      console.log("Body: ", body)
-      // console.log("Url: ", this.dinamoDBUrlPostChatHistory)
-  
+      console.log("Body: ", body)  
       return this.http.post<any>(this.apiHost+ '/save-message', body, {headers: this.headers});
     }
 

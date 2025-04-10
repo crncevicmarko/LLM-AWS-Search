@@ -19,7 +19,7 @@
             </div>
             <div class="ai-block">
               <p class="time-style">{{ pair.timestamp }}</p>
-              <p class="ai">ChatBot:</p>
+              <p class="ai">Tixie:</p>
               <p class="ai-text" [innerHTML]="pair.bot"></p>
             </div>
           </div>
@@ -28,7 +28,8 @@
 
       <form class="chat-form" (ngSubmit)="onSubmit()" #chatForm="ngForm">
         <mat-form-field class="chat-form-field" subscriptSizing="dynamic">
-          <textarea 
+          <textarea
+            [disabled]= thinking
             matInput
             #chatInput
             [(ngModel)]="userInput"

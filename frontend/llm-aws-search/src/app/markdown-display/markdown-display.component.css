@@ -198,7 +198,6 @@ html{
       padding-top: 10px;
     }
     
-    
     /* Mobile Responsive Design */
     @media screen and (max-width: 480px) {
       .chat-box p {

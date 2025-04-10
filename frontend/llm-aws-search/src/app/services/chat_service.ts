@@ -39,6 +39,12 @@ export class ChatCommunicationService {
 
   getAllChats(): Chat[] {
     // ovde ce da ide GET https koji ce da fecuje sve chatove i smestace ih u this.chats listu. mora tako zato sto je sidebar komponenta postavljena u chatbotpge componetnu, i kada se kreira refresuje ta stranica refersuje se i sidebar sto je no bueno.
+    console.log("Usli u getAllChats")
+    this.chatbotService.getUserChatsByUserId("user").subscribe(res => {
+      console.log("Response: ", res)
+    }, err => {
+      console.log(err)
+    })
     return this.chats;
   }
 
