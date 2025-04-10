@@ -22,7 +22,12 @@ export class ChatService{
 
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
     }
+    getUserChats(userId: string): Observable<Chat[]> {
 
+      return this.http.get<any[]>(`${this.apiHost}/chats-by-user?user_id=`+userId, { headers: this.headers })
+          
+  }
+    
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
 
@@ -31,6 +36,7 @@ export class ChatService{
         params,
         responseType: 'json'
       });
+      return new Observable;
     }
 
     postNewChatMessage(user_id: string, chat_id: string, userMessage: string, chatMessage: string) {
