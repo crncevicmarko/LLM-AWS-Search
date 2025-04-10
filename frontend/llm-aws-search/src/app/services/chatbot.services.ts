@@ -30,12 +30,12 @@ export class ChatService{
     
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
-/*
+
       return this.http.get(this.apiHost+ '/get-messages', {
         headers: this.headers,
         params,
         responseType: 'json'
-      });*/
+      });
       return new Observable;
     }
 

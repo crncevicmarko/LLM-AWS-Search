@@ -92,55 +92,7 @@ constructor(
         console.log("Chat parovi iz local storage: ",this.chatPairs)
     }else{
       console.log("session storage je prazan")
-      this.chatHistory = [
-        {
-        user_message: "give me tickets about retreveUserInput lambda",
-        user_id: this.user_id,
-        chat_message: `¡Hola! Estoy encantada de poder brindarte información sobre los tickets de Jira relevantes para tu solicitud sobre la función Lambda "retrieveUserInput".
-        - **ID: SCRUM-17 Conectar la función Lambda AWS RetreveUserInput con el servicio Bedrock**
-        Descripción: La tarea consiste en crear o actualizar una función Lambda de AWS para interactuar con el servicio AWS Bedrock. La función Lambda hará lo siguiente:
-        - Recibir la entrada del usuario a través de una API Gateway.
-        - Llamar al servicio Bedrock para generar incrustaciones o respuestas de texto en función de la entrada.
-        - Si es aplicable, usar las incrustaciones para consultar una base de datos de vectores (por ejemplo, Pinecone).
-        - Dar formato a los resultados en un formato amigable para el usuario.
-        - Devolver la respuesta con formato al cliente.
-        (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-17)
-
-        ¡Espero que esta información sobre los tickets de Jira relevantes haya sido útil! Si necesitas más detalles o tienes más preguntas, no dudes en hacérmelas saber. Estoy aquí para ayudarte en todo lo que pueda.`,
-        chat_id: this.chatId,
-        timestamp: 1744008177
-      },
-      {
-        user_message: "what are the issues related to getMessages lambda",
-        user_id: this.user_id,
-        chat_message: `Sure! Here's a list of Jira tickets related to the Lambda function "getMessages":
-          - **ID: SCRUM-25 Implement the Lambda getMessages to retrieve past user chats**
-          Description: This ticket focuses on building the Lambda function responsible for retrieving previous messages based on a chat session ID. This Lambda will pull messages from DynamoDB and format them accordingly.
-          (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-25)
-
-          - **ID: SCRUM-51 Enable pagination support in getMessages Lambda**
-          Description: To improve performance and UX, implement pagination in the getMessages Lambda using limit and nextToken from DynamoDB queries.
-          (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-51)
-
-          Let me know if you’d like ticket details or implementation notes!`,
-        chat_id: this.chatId,
-        timestamp: 1744008288
-      },
-      {
-        user_message:"give me some tickets that are about JIRA",
-        user_id : this.user_id,
-        chat_message:`
-        - **ID: SCRUM-48 Inicializar la función Lambda GetTickets para obtener tickets de Jira**
-        Descripción: Desarrollar e implementar una función Lambda de AWS ({{GetTickets}}) para recuperar tickets de Jira de una instancia de Jira especificada a través de la API REST de Jira.
-        (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-48)
-
-      //   - **ID: SCRUM-49 Reenviar la entrada del usuario a la función Lambda retrieveUserInput a través de una solicitud HTTP**
-      //   Descripción: Como usuario, quiero enviar mi entrada (como un mensaje o datos) desde el frontend a una función Lambda de AWS a través de una solicitud HTTP, para que la función Lambda pueda procesar la entrada y devolver la respuesta adecuada que se mostrará en la interfaz de usuario.
-      //   (https://jiralevi9internship2025.atlassian.net/browse/SCRUM-49)`,
-        chat_id : this.chatId,
-         timestamp:1744008299,
-       }
-       ]
+      
       this.chatService.getChatsById(this.chatId).subscribe({
         next: (res) => {
           this.chatHistory = res.messages
