@@ -237,7 +237,6 @@ constructor(
         this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
           next: (response) => {
             console.log('Message successfully saved to DynamoDB:', response);
-            alert("Data successfuly saved")
           },
           error: (err) => {
             console.error('Failed to save message to DynamoDB:', err);
@@ -253,6 +252,8 @@ constructor(
       console.log("Updated newValue after response: ", this.newValue);
     });
   }
+
+  
 
   simulateTyping(response: string, responseIndex: number) {
     let words = response.split(' ');
