@@ -192,22 +192,22 @@ constructor(
       alert('Your input is the same as the last prompt. Please enter something different.');
       return;
     }
-  
+
     const userMsg = this.userInput;
     this.userInput = "";
     this.thinking = true;
-    
+
     const currentTime = new Date().toLocaleTimeString();
     const responseIndex = this.chatPairs.length;
-  
+
     console.log("Chat Pairs before update: ", this.chatPairs);
-  
+
     this.chatPairs.push({
       user: userMsg,
-      bot: "", 
+      bot: "",
       timestamp: currentTime
     });
-  
+
     const storedChat = sessionStorage.getItem(this.chatId);
 
     let formattedChatHistory: any[] = [];
@@ -231,12 +231,12 @@ constructor(
       const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
-    
+
       if (this.chatPairs[responseIndex]) {
         this.chatPairs[responseIndex].user = userMsg;
         this.chatPairs[responseIndex].bot = this.newValue;
         this.chatPairs[responseIndex].timestamp = new Date().toLocaleTimeString();
-    
+
         console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
 
         // ovde treba da se salje POST request do DINAMO-DB-a-------------------------------------------------
@@ -251,15 +251,15 @@ constructor(
         });
 
         this.saveChatHistoryLocally();
-    
+
         this.simulateTyping(parsedResponse, responseIndex);
       }
-    
+
       console.log("Updated newValue after response: ", this.newValue);
     });
   }
 
-  
+
 
   simulateTyping(response: string, responseIndex: number) {
     let words = response.split(' ');
@@ -267,12 +267,12 @@ constructor(
     let index = 0;
     const wordsPerBatch = 5;
     const typingSpeed = 300;
-  
+
     const intervalId = setInterval(() => {
       currentWords.push(...words.slice(index, index + wordsPerBatch));
       this.chatPairs[responseIndex].bot = currentWords.join(" ");
       this.cdRef.detectChanges();
-  
+
       index += wordsPerBatch;
       if (index >= words.length) {
         clearInterval(intervalId);
@@ -280,19 +280,19 @@ constructor(
       }
     }, typingSpeed);
   }
-  
+
 
   isSameAsLastPrompt(): boolean {
 
     return this.userMessages[this.userMessages.length-1] === this.userInput;
   }
-  
+
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
   resizeInput(inputElement: HTMLTextAreaElement): void {
     // Reset the height of the input element
-    
+
     inputElement.style.height = 'auto';
 
     // Set the height to match the scrollHeight (to simulate expansion)
@@ -313,5 +313,9 @@ constructor(
   logOut(): void {
     this.authService.signOut();
     this.router.navigate(['login']);
+  }
+
+  reportBug(){
+
   }
 }

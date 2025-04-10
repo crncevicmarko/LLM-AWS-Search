@@ -5,11 +5,14 @@
       <div class="chat-box-container">
         <div class="nav-bar">
           <h1 class="chat-box-header">tixie.</h1>
+          <button mat-raised-button class="report-bug-btn" (click)="reportBug()" >
+            Report bug
+          </button>
           <button mat-raised-button class="log-out-btn" (click)="logOut()" >
             Log out
           </button>
         </div>
-          
+
         <div class="chat-box" #chatBox>
           <div *ngFor="let umessage of userMessages; let i = index" class="ai-person-container">
             <div class="person-block">
@@ -28,7 +31,7 @@
 
       <form class="chat-form" (ngSubmit)="onSubmit()" #chatForm="ngForm">
         <mat-form-field class="chat-form-field" subscriptSizing="dynamic">
-          <textarea 
+          <textarea
             matInput
             #chatInput
             [(ngModel)]="userInput"
@@ -41,22 +44,16 @@
             (keydown.enter)="onSubmit()"
           ></textarea>
         </mat-form-field>
-        
+
         <button
           class="chat-submit"
           type="submit"
           name="submit"
           [disabled]="!chatForm.valid || thinking || !userInput.trim()"
         >
-          <span *ngIf="!thinking">
-            <i class="fas fa-paper-plane"></i>
-          </span>
-          <span *ngIf="thinking">
-            <i class="fas fa-spinner fa-spin"></i>
-          </span>
         </button>
       </form>
     </main>
   </div>
- 
+
 </body>
