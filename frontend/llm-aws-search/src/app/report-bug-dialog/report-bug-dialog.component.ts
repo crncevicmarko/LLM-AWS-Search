@@ -2,13 +2,15 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from '../common/material.module';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ChatCommunicationService } from '../services/chat_service';
+import { ChatService } from '../services/chatbot.services';
 
 @Component({
   selector: 'app-report-bug-dialog',
   standalone: true,
   imports: [MaterialModule, ReactiveFormsModule, FormsModule],
   templateUrl: './report-bug-dialog.component.html',
-  styleUrl: './report-bug-dialog.component.css'
+  styleUrls: ['./report-bug-dialog.component.css']
 })
 export class ReportBugDialogComponent {
   bugForm: FormGroup;
@@ -16,7 +18,8 @@ export class ReportBugDialogComponent {
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<ReportBugDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private bugReportService: ChatService
   ) {
     this.bugForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -29,8 +32,19 @@ export class ReportBugDialogComponent {
   }
 
   onReport(): void {
+    console.log("USAOO 35")
     if (this.bugForm.valid) {
-      this.dialogRef.close(this.bugForm.value);
+      console.log("USAOO")
+      const bugData = this.bugForm.value;
+      this.bugReportService.reportBug(bugData).subscribe(
+        (response) => {
+          console.log('Bug report sent successfully:', response);
+          this.dialogRef.close();
+        },
+        (error) => {
+          console.error('Error sending bug report:', error);
+        }
+      );
     }
   }
 }

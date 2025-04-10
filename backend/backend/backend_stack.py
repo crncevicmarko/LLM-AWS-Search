@@ -335,3 +335,37 @@ class BackendStack(Stack):
         get_title_integration = apigateway.LambdaIntegration(get_title_by_id_lambda)
 
         self.api.root.add_resource("get-title").add_method("GET", get_title_integration)
+
+        sendBugReport = _lambda.Function(
+            self, "sendBugReport",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            handler="sendBugReport.handler",
+            code=_lambda.Code.from_asset("lambda"),
+            memory_size=512,
+            timeout=Duration.seconds(60),
+
+        )
+
+        sendBugReport.add_to_role_policy(
+        iam.PolicyStatement(
+            actions=["ses:SendEmail"],
+            resources=[
+                "arn:aws:ses:eu-west-1:785202558517:identity/grubor.masa@gmail.com",  # Sender Email
+                "arn:aws:ses:eu-west-1:785202558517:identity/dobrosavtufegdzic@gmail.com"  # Recipient Email
+            ]
+        )
+)
+        
+        sendBugReport.add_to_role_policy(
+    iam.PolicyStatement(
+        actions=["bedrock:InvokeModel"],
+        resources=[
+            "arn:aws:bedrock:eu-west-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"  # Specific Bedrock model
+        ]
+    )
+)
+
+        sendBugReport_integration = apigateway.LambdaIntegration(sendBugReport)
+
+        self.api.root.add_resource("send-bug-report").add_method("POST", sendBugReport_integration)
+

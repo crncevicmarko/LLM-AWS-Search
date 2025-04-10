@@ -42,7 +42,7 @@ export class ChatService{
       };
       console.log("Body: ", body)
       // console.log("Url: ", this.dinamoDBUrlPostChatHistory)
-  
+
       return this.http.post<any>(this.apiHost+ '/save-message', body, {headers: this.headers});
     }
 
@@ -62,6 +62,11 @@ export class ChatService{
       this.chats.push({userId:1,name:randomName,id:chat_id})
       console.log(this.chats);
       return this.chats;
+    }
+
+    reportBug(bugData: { email: string; description: string }): Observable<any> {
+      console.log("Usaoo")
+      return this.http.post<any>('https://ax08zk1nzj.execute-api.eu-west-1.amazonaws.com/prod/send-bug-report', bugData);
     }
 
     }
