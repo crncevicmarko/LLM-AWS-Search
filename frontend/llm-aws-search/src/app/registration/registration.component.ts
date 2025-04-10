@@ -71,20 +71,39 @@ export class RegistrationComponent {
     };
     console.log("user pool id:",environment.userPoolId)
     const userPool = new CognitoUserPool(poolData);
-
-
-    if(user.username && user.password){
-      userPool.signUp(user.username, user.password, attributeList.length > 0 ? attributeList : [], [], (err, result) => {
-        if (err) {
-          console.error('Error occurred during registration:', err);
-          this.openErrorSnackBar('Failed to register user. Please try again.');
-          return;
+    if (user.username && user.password) {
+      userPool.signUp(
+        user.username,
+        user.password,
+        attributeList.length > 0 ? attributeList : [],
+        [],
+        (err, result) => {
+          if (err) {
+            console.error('Error occurred during registration:', err);
+          
+            const error = err as any; 
+          
+            let userFriendlyMessage = 'An unexpected error occurred. Please try again.';
+          
+            if (error.code === 'UsernameExistsException') {
+              userFriendlyMessage = 'An account with this email already exists.';
+            } else if (error.code === 'InvalidPasswordException') {
+              userFriendlyMessage = 'Password is too weak. It must contain at least 8 characters, including uppercase, lowercase, and a number.';
+            } else if (error.code === 'InvalidParameterException') {
+              userFriendlyMessage = 'Some of the entered information is invalid.';
+            } else if (error.code === 'TooManyRequestsException') {
+              userFriendlyMessage = 'Too many attempts. Please try again later.';
+            } else if (error.message) {
+              userFriendlyMessage = error.message;
+            }
+            this.openErrorSnackBar(userFriendlyMessage);
+            return;
+          }
+          console.log('User registered successfully:', result?.user);
+          this.router.navigate(['verifyAccount', user.username]);
         }
-        console.log('User registered successfully:', result?.user);
-        this.router.navigate(['verifyAccount',user.username])
-      });
+      );
     }
-   
 
   }
 
