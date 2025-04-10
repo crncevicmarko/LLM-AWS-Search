@@ -6,6 +6,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Chat } from '../models/chat.model';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ReportBugDialogComponent } from '../report-bug-dialog/report-bug-dialog.component';
 
 
 @Component({
@@ -38,7 +40,8 @@ constructor(
   private mdComp:MarkdownDisplayComponent,
   private route: ActivatedRoute,
   private authService: AuthService,
-  private router: Router
+  private router: Router,
+  private dialog: MatDialog
 ) { }
 
   ngOnInit(): void {
@@ -79,6 +82,17 @@ constructor(
     this.router.navigate(['login']);
   }
 
+  reportBug() {
+    const dialogRef = this.dialog.open(ReportBugDialogComponent, {
+      width: '500px',
+      data: {}
+    });
 
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Bug reported:', result);
+      }
+    });
+  }
 }
 

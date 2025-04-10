@@ -2,7 +2,7 @@ html{
   padding: 0%;
 }
 body {
- 
+
     font-family: sans-serif;
     -ms-overflow-style: scrollbar;
     background-color: #1E1E2E ;
@@ -11,24 +11,24 @@ body {
   }
 .layout-container {
   display: flex;
-  height: 100vh; 
+  height: 100vh;
 }
 
 app-sidebar {
-  width: 250px; 
-  height: 100vh; 
-  position: fixed; 
+  width: 250px;
+  height: 100vh;
+  position: fixed;
   top: 0;
   left: 0;
   background-color: #333;
   color: white;
-  z-index: 100; 
+  z-index: 100;
 }
 
 .main-content {
-  margin-left: 250px; 
+  margin-left: 250px;
   overflow-y: auto;
-  flex-grow: 1; 
+  flex-grow: 1;
   background-color: #f4f4f4;
 }
 
@@ -49,7 +49,7 @@ app-sidebar {
     position: relative;
     display: flex;
     flex-direction: column;
-    
+
   }
   .nav-bar{
     margin-left: 45%;
@@ -72,6 +72,14 @@ app-sidebar {
     color: #fc0bd3 !important;
     border: 2px solid #fc0bd3;
   }
+  .report-bug-btn{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3%;
+    background-color: #1E1E2E;
+    color: #fc0bd3 !important;
+    border: 2px solid #fc0bd3;
+  }
   .chat-box-header {
     display: block;
     text-align: center;
@@ -79,7 +87,7 @@ app-sidebar {
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     font-size: 30px;
   }
-  
+
   /* Chat Box */
   .chat-box {
     margin: 4px 4px 4px 4px;
@@ -97,13 +105,13 @@ app-sidebar {
     margin: 0;
     font-size: 24px;
   }
-  
+
   /* Message Container */
   .ai-person-container {
     display: inline-block;
     overflow: auto;
   }
-  
+
   .ai,
   .person {
     overflow: auto;
@@ -125,7 +133,7 @@ app-sidebar {
     padding-bottom: 4px;
     display: inline-block;
   }
-  
+
   .ai {
     color: #72E0FF ;
   }
@@ -134,9 +142,9 @@ app-sidebar {
   }
   .person {
     color: #fc0bd3 ;
-    
+
   }
-  
+
   .ai-block,
   .person-block {
     font-size: 10px;
@@ -148,12 +156,12 @@ app-sidebar {
     flex-direction: column; /* Stack the messages vertically */
     width: 100%; /* Ensures full width */
   }
-  
+
   .ai-block {
     align-self:flex-start;
     margin-left: 6px;
   }
-  
+
   .person-block {
     align-self:flex-end;
     margin-right: 6px;
@@ -166,12 +174,12 @@ app-sidebar {
     align-items: center;
     width: 100%;
   }
-  
+
   .chat-input {
   align-content: center;
   display: flex;
   height: 40px;
-  /* min-height: 40px; 
+  /* min-height: 40px;
   max-height: 150px;  */
   overflow-x: hidden;
   /* flex-grow: 1; */
@@ -192,7 +200,7 @@ app-sidebar {
 }
 
   ::ng-deep .mat-mdc-form-field-infix {
-    padding: 0 !important; 
+    padding: 0 !important;
     min-height: auto !important;
      width: 100% !important;
      margin: 0 !important;
@@ -205,13 +213,13 @@ app-sidebar {
     margin-top: 10px;
     margin-bottom: 10px;
     box-shadow: none !important;
-  
-  } 
+
+  }
 
   ::ng-deep .mat-mdc-form-field {
     border-bottom: none !important;
     box-shadow: none !important;
-    
+
   }
 
 
@@ -222,15 +230,15 @@ app-sidebar {
     font-size:24px;
   }
 
-  
+
 
   .chat-input::placeholder {
-    font-size: 30px; 
-    color: #fc0bd3; 
-    opacity: 0.7; 
+    font-size: 30px;
+    color: #fc0bd3;
+    opacity: 0.7;
     align-items:center;
   }
-  
+
   .chat-submit {
     width: 70px;
     height: 47px !important;
@@ -242,26 +250,26 @@ app-sidebar {
     transition: background-color 0.3s ease;
     margin-right: 10px;
   }
-  
+
   .chat-submit:disabled {
     background-color: gray;
     cursor: not-allowed;
   }
-  
+
   /* Spinner icon */
   .fa-spinner {
     font-size: 20px;
     color: white;
   }
-  
+
 
   .time-style {
-    font-family: 'Courier New', Courier, monospace; 
+    font-family: 'Courier New', Courier, monospace;
     font-size: 22px !important;
-    color: #7a7675; 
+    color: #7a7675;
     padding-top: 10px;
   }
- 
+
   /* Mobile Responsive Design */
   @media screen and (max-width: 480px) {
     .chat-box p {
@@ -276,3 +284,22 @@ app-sidebar {
       float: right;
     }
   }
+
+
+/* Dodavanje padding-a u input polja */
+mat-form-field .mat-input-element {
+  padding: 20px; /* Povećava padding unutar input polja */
+}
+
+mat-form-field {
+  width: 100%;
+  margin-left: 20px;
+  margin-right: 20px;
+  font-size: 28px;
+  padding: 5px;
+}
+
+mat-form-field .mat-input-element {
+  padding: 2px; /* Set padding to 2px */
+}
+

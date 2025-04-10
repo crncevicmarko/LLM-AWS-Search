@@ -7,7 +7,6 @@ import { Chat } from '../models/chat.model';
 import { timestamp } from 'rxjs';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
-// import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-chat-bot-page',
@@ -30,9 +29,10 @@ typingSpeed: number = 50;
 chatId: any;
 chatHistory: any;
 chatPairs: { user: string, bot: string, timestamp: string }[] = [];
-private initialized = false;
+chatPairsClone: { user: string, bot: string, timestamp: string }[] = [];
 user_id = "";
 chat_history: any;
+private pendingUserInput: string | null = null;
 constructor(
   private chatService: ChatService,
   private chatCommunicationService: ChatCommunicationService,
@@ -61,18 +61,11 @@ constructor(
       
     });
 
-    // Second subscription: input from ChatbotComponent
     this.chatCommunicationService.userInput$.subscribe(({ input, chatId }) => {
       console.log("Usli u onInit u ChatBotPageComponent 2");
-      // this.chatId = chatId;
       this.userInput = input;
-
-      if (this.router.url !== `/chat/${chatId}`) {
-        this.router.navigate([`/chat/${chatId}`]);
-      }
-
-      console.log("Usli u chat-bot-page componentu:", "chat id:", this.chatId, " user input:", this.userInput);
-      this.onSubmit();
+      this.cloneSubmit();
+      // this.onSubmit();
     });
   }
 
@@ -88,9 +81,6 @@ constructor(
     sessionStorage.clear();
   }
   loadChatData(): void {
-    // const storedChatHistory = localStorage.getItem(`chat-${this.chatId}`);
-    // if (!this.chatPairs || this.chatPairs.length === 0) {
-    // const storedChatHistory = sessionStorage.getItem(`09e16992-880b-4ee0-b20f-af7f6baa8c00`);
     console.log("ChatID kada vrsimo ucitavanje istorije: ", this.chatId)
     const storedChatHistory = sessionStorage.getItem(this.chatId);
     if (storedChatHistory) {
@@ -182,41 +172,15 @@ constructor(
     sessionStorage.setItem(this.chatId, JSON.stringify(chatData));
   }
   newValue = ''
+  newCloneSubmitValue = ''
 
   // Function to handle form submission
-  onSubmit() {
-    if (this.isSameAsLastPrompt()) {
-      alert('Your input is the same as the last prompt. Please enter something different.');
-      return;
-    }
-
-    const userMsg = this.userInput;
-    this.userInput = "";
-    this.thinking = true;
-     if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
-      {
-        console.log("new chat postoji");
-        this.chatCommunicationService.saveChat(this.user_id,userMsg,this.chatId).subscribe();
-        console.log("refresujem");
-        this.chatCommunicationService.refreshPage();
-        alert("Please refresh the page.");
-
-      }
-    const currentTime = new Date().toLocaleTimeString();
-    const responseIndex = this.chatPairs.length;
   
-    console.log("Chat Pairs before update: ", this.chatPairs);
   
-    this.chatPairs.push({
-      user: userMsg,
-      bot: "", 
-      timestamp: currentTime
-    });
-  
+  getFormattedChatHistory(): any[] {
     const storedChat = sessionStorage.getItem(this.chatId);
-
     let formattedChatHistory: any[] = [];
-
+  
     if (storedChat && storedChat.trim() !== "") {
       try {
         const parsed = JSON.parse(storedChat);
@@ -228,19 +192,88 @@ constructor(
         }
       } catch (e) {
         console.error("Error parsing sessionStorage: ", e);
-        formattedChatHistory = [];
       }
     }
+  
+    return formattedChatHistory;
+  
+  }
+  cloneSubmit(){
+    const userMsg = this.userInput;
+    this.userInput = ""; // obrisemo user text iz input polja kada se posalje zahtev
+    this.thinking = true;
+
+    // treba da se samo kreira novi zahtev koji ce da se sacuva u
+    const formattedChatHistory = this.getFormattedChatHistory();
+
+    this.chatService.recieveUserInput({ message: userMsg }, formattedChatHistory).subscribe(res => {
+      const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
+      this.newValue = parsedResponse;
+      console.log("Parsed Response: ", parsedResponse);
+      const responseIndex = this.chatPairs.length;
+      console.log("Response index: ", responseIndex)
+
+      this.chatPairs.push({
+        user: userMsg,
+        bot: "", 
+        timestamp: new Date().toLocaleTimeString()
+      });
+  
+
+      this.simulateTyping(parsedResponse, responseIndex); 
+    
+      console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
+      
+      // save new chat conversation to the DINAMO
+      this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
+        next: (response) => {
+          console.log('Message successfully saved to DynamoDB:', response);
+        },
+        error: (err) => {
+          console.error('Failed to save message to DynamoDB:', err);
+        }
+      });
+    
+      console.log("Updated newValue after response: ", this.newValue);
+    });
+
+    this.saveChatHistoryLocally();
+  }
+
+  onSubmit() {
+    const userMsg = this.userInput;
+    this.userInput = ""; // obrisemo user text iz input polja kada se posalje zahtev
+    this.thinking = true;
+    if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
+      {
+        console.log("new chat postoji");
+        this.chatCommunicationService.saveChat(this.user_id,userMsg,this.chatId).subscribe();
+        console.log("refresujem");
+        this.chatCommunicationService.refreshPage();
+        alert("Please refresh the page.");
+
+      }
+    const currentTime = new Date().toLocaleTimeString();
+    const responseIndex = this.chatPairs.length;
+    console.log("Response Index: ", responseIndex)
+  
+    console.log("Chat Pairs before update: ", this.chatPairs);
+  
+    this.chatPairs.push({
+      user: userMsg,
+      bot: "", 
+      timestamp: currentTime
+    });
+  
+    const formattedChatHistory = this.getFormattedChatHistory();
 
     this.chatService.recieveUserInput({ message: userMsg }, formattedChatHistory).subscribe(res => {
       const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
     
-      if (this.chatPairs[responseIndex]) {
-        this.chatPairs[responseIndex].user = userMsg;
-        this.chatPairs[responseIndex].bot = this.newValue;
-        this.chatPairs[responseIndex].timestamp = new Date().toLocaleTimeString();
+      this.simulateTyping(parsedResponse, responseIndex); 
+      // this.chatPairs[responseIndex].bot = this.newValue
     
         console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
 
@@ -256,17 +289,25 @@ constructor(
         }); 
 
         this.saveChatHistoryLocally();
+      console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
     
-        this.simulateTyping(parsedResponse, responseIndex);
-      }
+      this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
+        next: (response) => {
+          console.log('Message successfully saved to DynamoDB:', response);
+        },
+        error: (err) => {
+          console.error('Failed to save message to DynamoDB:', err);
+        }
+      });
+    
+      this.saveChatHistoryLocally();
     
       console.log("Updated newValue after response: ", this.newValue);
     });
    
           
       }
-
-  
+    
 
   simulateTyping(response: string, responseIndex: number) {
     let words = response.split(' ');
@@ -274,6 +315,7 @@ constructor(
     let index = 0;
     const wordsPerBatch = 5;
     const typingSpeed = 300;
+    console.log("Chat Pairs in simulate typing: ", this.chatPairs[responseIndex].bot)
   
     const intervalId = setInterval(() => {
       currentWords.push(...words.slice(index, index + wordsPerBatch));
@@ -297,15 +339,11 @@ constructor(
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
-  resizeInput(inputElement: HTMLTextAreaElement): void {
-    // Reset the height of the input element
-    
+  resizeInput(inputElement: HTMLTextAreaElement): void {    
     inputElement.style.height = 'auto';
 
-    // Set the height to match the scrollHeight (to simulate expansion)
     inputElement.style.height = `${inputElement.scrollHeight}px`;
 
-    // Ensure the height doesn't grow indefinitely, e.g., setting max-height
     if (inputElement.scrollHeight > 100) {
       inputElement.style.height = '100px'; // Max height, can be adjusted
     }
