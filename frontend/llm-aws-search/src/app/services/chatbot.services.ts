@@ -62,4 +62,9 @@ export class ChatService{
       return this.chats;
     }
 
+    reportBug(bugData: { email: string; description: string }): Observable<any> {
+      console.log("Usaoo")
+      return this.http.post<any>('https://ax08zk1nzj.execute-api.eu-west-1.amazonaws.com/prod/send-bug-report', bugData);
+    }
+
     }

@@ -274,13 +274,11 @@ constructor(
       this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
         next: (response) => {
           console.log('Message successfully saved to DynamoDB:', response);
-          this.chatCommunicationService.triggerSidebarRefresh();
         },
         error: (err) => {
           console.error('Failed to save message to DynamoDB:', err);
         }
       });
-      console.log("Poslednja vrednost koja ce da se prosledi u sessiju: ",this.chatPairs[responseIndex].bot)
       
       this.saveChatHistoryLocally();
     

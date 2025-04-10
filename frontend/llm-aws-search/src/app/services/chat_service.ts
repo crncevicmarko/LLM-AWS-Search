@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { Chat } from '../models/chat.model';
 import { ChatService } from './chatbot.services';
 
@@ -83,4 +83,5 @@ export class ChatCommunicationService {
     console.log("Usli u send user input")
     this.userInputSubject.next({ input, chatId });
   }
+
 }
