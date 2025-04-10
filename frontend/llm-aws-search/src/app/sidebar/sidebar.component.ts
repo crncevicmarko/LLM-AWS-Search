@@ -3,7 +3,8 @@ import { Chat } from '../models/chat.model';
 import { ChatService } from '../services/chatbot.services';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
+import { Router,NavigationEnd,Event as RouterEvent} from '@angular/router';
+import { filter } from 'rxjs';
 
 
 @Component({
@@ -53,21 +54,23 @@ export class SidebarComponent {
     if (token) this.isLoggedIn = true;
     else this.isLoggedIn = false;
   }
-  addChat()
-  {
+  addChat() {
     const uuid = crypto.randomUUID();
-    console.log("UUID: ",uuid) 
-    // ovo bi trebalo da kreira novi chat ali u chatCommunicationService-u i da ih tamo skadisti
-    // ovo bi trebalo da izvuce te chatove iz tog servisa i da ih displajuje kod sebe
-   /* this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
-      console.log("Chats received:", chats);
-      this.chats=chats;
-    });  */
-    console.log(this.chats)
-    this.chats=    this.chatCommunicationService.startNewChat(this.user_id, uuid);
-    console.log(this.chats);  
-    this.router.navigate(['chat/', uuid]);
-
+    console.log("Generated UUID:", uuid);
+  
+    const navSub = this.router.events
+    .pipe(
+      filter((event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd)
+    )
+    .subscribe(() => {
+      setTimeout(() => {
+        this.chats = this.chatCommunicationService.startNewChat(this.user_id, uuid);
+        console.log("Chats after route loaded:", this.chats);
+        navSub.unsubscribe();
+      }, 1000);
+    });
+  
+    this.router.navigate(['chat', uuid]);
   }
   refresh(){
     this.chatCommunicationService.refreshPage$.subscribe()

@@ -50,10 +50,7 @@ constructor(
 
     // ako je udjeno u drugi chat ili refresovana stranica trebala bi da se loduje cela istorija ponovo.
     this.sessionRefresh();
-        if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
-        {
-          
-        }
+
     this.route.paramMap.subscribe(params => {
       console.log("Usli u onInit u ChatBotPageComponent 1");
       this.chatId = params.get('id');
