@@ -282,3 +282,12 @@ app-sidebar {
     color: #fc0bd3 !important;  /* Bright pink or any color you prefer */
     text-decoration: underline; /* Optional: keeps underline */
   }
+
+  .report-bug-btn{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3%;
+    background-color: #1E1E2E;
+    color: #fc0bd3 !important;
+    border: 2px solid #fc0bd3;
+  }

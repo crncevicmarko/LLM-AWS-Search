@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Chat } from '../models/chat.model';
-import { ChatService } from '../services/chatbot.services';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
@@ -18,30 +17,25 @@ export class SidebarComponent {
   user_id: any;
   isLoggedIn: boolean = false
 
-  constructor(private chatCommunicationService: ChatCommunicationService,private authService:AuthService) {}
+  constructor(private chatCommunicationService: ChatCommunicationService,private authService:AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    this.loadChats();
     this.userAuthData();
-    // this.chatCommunicationService.newChat$.subscribe(res => {
-      // ovde bi trebali da prikazujemo samo novo kreirane chatove iz chatCommunicationService-a
-      // this.chats = this.chatCommunicationService.getAllChats();
-    // });
 
     this.chatCommunicationService.refreshSidebar$.subscribe(() => {
       console.log("Usli u ngOnInit od side bara u refreshSidebar")
     })
  
-    this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
-      this.chats=chats;
-    });
-    console.log(this.user_id)
-    console.log(this.chats)
-    this.chatCommunicationService.newChat$.subscribe(res => {
-      this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
-        this.chats=chats;
-      });
-    });
+    // this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+    //   this.chats=chats;
+    // });
+    // // console.log(this.user_id)
+    // // console.log(this.chats)
+    // this.chatCommunicationService.newChat$.subscribe(res => {
+    //   this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+    //     this.chats=chats;
+    //   });
+    // });
   }
 
   userAuthData():void {
@@ -55,11 +49,8 @@ export class SidebarComponent {
   {
     const uuid = crypto.randomUUID();
     console.log("UUID: ",uuid) 
-    // ovo bi trebalo da kreira novi chat ali u chatCommunicationService-u i da ih tamo skadisti
-    // this.chatCommunicationService.startNewChat(1, uuid);
-    // ovo bi trebalo da izvuce te chatove iz tog servisa i da ih displajuje kod sebe
-    // this.chats = this.chatCommunicationService.getAllChats();
     this.startNewChat(1, uuid)
+    this.router.navigate(['chat/', uuid]);
   }
 
   // addChat()
@@ -67,16 +58,17 @@ export class SidebarComponent {
   //   const uuid = crypto.randomUUID();
   //   console.log("UUID: ",uuid) 
   //   console.log(this.chats)
-  //   this.chats=    this.chatCommunicationService.startNewChat(this.user_id, uuid);
+  //   this.chats.push(this.chatCommunicationService.startNewChat(this.user_id, uuid));
   //   console.log(this.chats);  
   //   this.router.navigate(['chat/', uuid]);
-
   // }
 
-  loadChats(){
-    // this.chats = this.chatCommunicationService.getAllChats()getAllChatsTest
-    this.chats = this.chatCommunicationService.getAllChatsTest()
-  }
+  // loadChats(){
+  //   // this.chats = this.chatCommunicationService.getAllChatsTest()
+  //   this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+  //     this.chats=chats;
+  //   });
+  // }
 
   startNewChat(userId: number, uuid: string): Chat {
     console.log("usli u startNewChat")

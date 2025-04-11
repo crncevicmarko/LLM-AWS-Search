@@ -105,7 +105,6 @@ export class ChatCommunicationService {
     });
   }
 
-
   getUserChats(userId: string): Observable<Chat[]> {
     console.log(`${this.apiHost}/chats-by-user?user_id=` + userId)
     const params = new HttpParams().set('user_id', userId);
@@ -125,22 +124,22 @@ export class ChatCommunicationService {
    return this.http.post<any>(this.apiHost+"/generate-title",chat,{});
   }
   
-  // sendUserInput(input: string, chatId: string) {
-  //   console.log("Usli u send user input")
-  //   this.userInputSubject.next({ input, chatId });
-  // }
-  // getChatNameLocally(chatId:any)
-  // {
-  //   const chat = this.chats.find(chat => chat.id === chatId);
-  //   if (chat) {
-  //     console.log(`Chat found: ${chat.name}`);
-  //     return chat.name==="New Chat";
-  //   } else {
-  //     console.log('Chat not found');
-  //     alert("Failed to initialize chat! Please add a new chat!");
-  //     return false;
-  //   }
-  // }
+  sendUserInput(input: string, chatId: string) {
+    console.log("Usli u send user input")
+    this.userInputSubject.next({ input, chatId });
+  }
+  getChatNameLocally(chatId:any)
+  {
+    const chat = this.chats.find(chat => chat.id === chatId);
+    if (chat) {
+      console.log(`Chat found: ${chat.name}`);
+      return chat.name==="New Chat";
+    } else {
+      console.log('Chat not found');
+      alert("Failed to initialize chat! Please add a new chat!");
+      return false;
+    }
+  }
   // refreshPage()
   // {
   //   this.refreshPageSubject.next("");

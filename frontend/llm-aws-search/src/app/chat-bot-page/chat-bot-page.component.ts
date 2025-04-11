@@ -7,6 +7,8 @@ import { Chat } from '../models/chat.model';
 import { timestamp } from 'rxjs';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ReportBugDialogComponent } from '../report-bug-dialog/report-bug-dialog.component';
 
 @Component({
   selector: 'app-chat-bot-page',
@@ -40,7 +42,8 @@ constructor(
   private mdComp:MarkdownDisplayComponent,
   private route: ActivatedRoute,
   private authService: AuthService,
-  private router: Router
+  private router: Router,
+  private dialog: MatDialog
 ) { }
 
   ngOnInit(): void {
@@ -50,10 +53,7 @@ constructor(
 
     // ako je udjeno u drugi chat ili refresovana stranica trebala bi da se loduje cela istorija ponovo.
     this.sessionRefresh();
-        if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
-        {
-          
-        }
+
     this.route.paramMap.subscribe(params => {
       console.log("Usli u onInit u ChatBotPageComponent 1");
       this.chatId = params.get('id');
@@ -129,7 +129,6 @@ constructor(
 
   // Function to handle form submission
   
-  
   getFormattedChatHistory(): any[] {
     const storedChat = sessionStorage.getItem(this.chatId);
     let formattedChatHistory: any[] = [];
@@ -170,7 +169,14 @@ constructor(
         bot: "", 
         timestamp: new Date().toLocaleTimeString()
       });
-  
+
+      if(parsedResponse !== "" && (this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
+      {
+        console.log("new chat postoji");
+        this.chatCommunicationService.saveChat(this.user_id,userMsg,this.chatId).subscribe();
+        console.log("refresujem");
+        // this.chatCommunicationService.triggerSidebarRefresh(); 
+      }
 
       this.simulateTyping(parsedResponse, responseIndex); 
     
@@ -197,15 +203,7 @@ constructor(
     const userMsg = this.userInput;
     this.userInput = ""; // obrisemo user text iz input polja kada se posalje zahtev
     this.thinking = true;
-    if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
-      {
-        console.log("new chat postoji");
-        this.chatCommunicationService.saveChat(this.user_id,userMsg,this.chatId).subscribe();
-        console.log("refresujem");
-        this.chatCommunicationService.refreshPage();
-        alert("Please refresh the page.");
 
-      }
     const currentTime = new Date().toLocaleTimeString();
     const responseIndex = this.chatPairs.length;
     console.log("Response Index: ", responseIndex)
@@ -224,6 +222,14 @@ constructor(
       const parsedResponse = this.mdComp.convertMarkdownToHTML(res.response);
       this.newValue = parsedResponse;
       console.log("Parsed Response: ", parsedResponse);
+
+      if(parsedResponse !== "" && (this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
+      {
+        console.log("new chat postoji");
+        this.chatCommunicationService.saveChat(this.user_id,userMsg,this.chatId).subscribe();
+        console.log("refresujem");
+        this.chatCommunicationService.triggerSidebarRefresh(); 
+      }
     
       this.simulateTyping(parsedResponse, responseIndex); 
       // this.chatPairs[responseIndex].bot = this.newValue
@@ -256,11 +262,8 @@ constructor(
       this.saveChatHistoryLocally();
     
       console.log("Updated newValue after response: ", this.newValue);
-    });
-   
-          
-      }
-    
+    });     
+  }
 
   simulateTyping(response: string, responseIndex: number) {
     let words = response.split(' ');
@@ -292,6 +295,7 @@ constructor(
   ngAfterViewChecked(): void {
     this.autoScroll();
   }
+
   resizeInput(inputElement: HTMLTextAreaElement): void {    
     inputElement.style.height = 'auto';
 
@@ -312,4 +316,17 @@ constructor(
     this.authService.signOut();
     this.router.navigate(['login']);
   }
+
+  reportBug() {
+      const dialogRef = this.dialog.open(ReportBugDialogComponent, {
+        width: '500px',
+        data: {}
+      });
+  
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          console.log('Bug reported:', result);
+        }
+      });
+    }
 }
