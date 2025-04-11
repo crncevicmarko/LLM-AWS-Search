@@ -67,7 +67,7 @@ app-sidebar {
   .log-out-btn{
     margin-top: auto;
     margin-bottom: auto;
-    margin-right: 3%;
+    margin-right: 2%;
     background-color: #1E1E2E;
     color: #fc0bd3 !important;
     border: 2px solid #fc0bd3;
@@ -303,3 +303,11 @@ mat-form-field .mat-input-element {
   padding: 2px; /* Set padding to 2px */
 }
 
+.button-group {
+  display: flex;
+  gap: 20px;
+}
+
+.button-group button {
+  width: 130px;
+}
