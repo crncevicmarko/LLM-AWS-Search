@@ -39,6 +39,13 @@ export class RegistrationComponent {
       this.formValid = false;
       return;
     }
+    const password = this.createRegisterForm.value.password;
+    const confirmPassword = this.createRegisterForm.value.confirmPassword;
+
+  if (password !== confirmPassword) {
+    this.openErrorSnackBar('Passwords do not match.');
+    return;
+  }
     const user: UserPostDTO = {
       firstName: this.createRegisterForm.value.name,
       lastName: this.createRegisterForm.value.surname,
