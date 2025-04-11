@@ -190,7 +190,7 @@ class BackendStack(Stack):
             code=_lambda.Code.from_asset("lambda/retrieveUserInput"),
             role=lambda_role,
             memory_size=512, 
-            timeout=Duration.seconds(60),
+            timeout=Duration.seconds(300),
             environment={  
                 "PINECONE_SECRET_ARN": pinecone_secrets.secret_arn,
                 "PINECONE_INDEX_URL": PINECONE_INDEX_URL,
@@ -286,17 +286,6 @@ class BackendStack(Stack):
         )
         chat_table.grant_write_data(save_message_lambda)
         chat_table.grant_read_data(get_messages_by_id)
-
-        get_title_by_id_lambda = create_lambda_function(
-            "GetTitleByIdLambda",
-            "getChatTitles.handler",  
-            "lambda",  
-            "GET",  
-            [],  
-            {
-                "TABLE_NAME": chat_titles.table_name  
-            }
-        )
 
 
         save_message_resource = self.api.root.add_resource("save-message")
