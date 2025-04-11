@@ -7,8 +7,8 @@ import { Chat } from '../models/chat.model';
 import { timestamp } from 'rxjs';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
-import { MatDialog } from '@angular/material/dialog';
 import { ReportBugDialogComponent } from '../report-bug-dialog/report-bug-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-chat-bot-page',
@@ -34,6 +34,7 @@ chatPairs: { user: string, bot: string, timestamp: string }[] = [];
 chatPairsClone: { user: string, bot: string, timestamp: string }[] = [];
 user_id = "";
 chat_history: any;
+
 private pendingUserInput: string | null = null;
 constructor(
   private chatService: ChatService,
@@ -203,7 +204,6 @@ constructor(
     const userMsg = this.userInput;
     this.userInput = ""; // obrisemo user text iz input polja kada se posalje zahtev
     this.thinking = true;
-
     const currentTime = new Date().toLocaleTimeString();
     const responseIndex = this.chatPairs.length;
     console.log("Response Index: ", responseIndex)
@@ -247,12 +247,34 @@ constructor(
           }
         }); 
 
-        this.saveChatHistoryLocally();
+      this.saveChatHistoryLocally();
       console.log("Updated Chat Pairs after bot response: ", this.chatPairs);
     
       this.chatService.postNewChatMessage(this.user_id, this.chatId, userMsg, parsedResponse).subscribe({
         next: (response) => {
           console.log('Message successfully saved to DynamoDB:', response);
+          if((this.chatCommunicationService.getChatNameLocally(this.route.snapshot.paramMap.get('id'))))
+            {
+              console.log("new chat postoji");
+              this.chatCommunicationService.saveChat(this.user_id, userMsg, this.chatId).subscribe({
+                next: (response: any) => {
+                  const parsedResponse = response?.response;
+                  console.log("ovo je response generate title:" + parsedResponse)
+                  this.chatCommunicationService.saveTitleLocally(this.user_id, this.chatId, parsedResponse);
+                  console.log("Title saved locally.");
+        
+                  // Optionally refresh UI or notify user
+        
+                  // If you really want a page refresh, you can emit the refresh event:
+                  // this.chatCommunicationService.refreshPage$.next(true);
+                },
+                error: (err:any) => {
+                  console.error("Error saving chat title:", err);
+                }
+              });
+             // this.chatCommunicationService.refreshPage();
+      
+            }
         },
         error: (err) => {
           console.error('Failed to save message to DynamoDB:', err);
@@ -316,7 +338,6 @@ constructor(
     this.authService.signOut();
     this.router.navigate(['login']);
   }
-
   reportBug() {
       const dialogRef = this.dialog.open(ReportBugDialogComponent, {
         width: '500px',

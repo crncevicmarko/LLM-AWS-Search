@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { Chat } from '../models/chat.model';
 import { ChatCommunicationService } from '../services/chat_service';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
+import { Router,NavigationEnd,Event as RouterEvent} from '@angular/router';
+import { filter } from 'rxjs';
 
 
 @Component({
@@ -26,16 +27,21 @@ export class SidebarComponent {
       console.log("Usli u ngOnInit od side bara u refreshSidebar")
     })
  
-    // this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
-    //   this.chats=chats;
-    // });
-    // // console.log(this.user_id)
-    // // console.log(this.chats)
-    // this.chatCommunicationService.newChat$.subscribe(res => {
-    //   this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
-    //     this.chats=chats;
-    //   });
-    // });
+    this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+      this.chats=chats;
+    });
+    
+    //console.log(this.chatCommunicationService.getAllChats(this.user_id))
+    this.chatCommunicationService.newChat$.subscribe(res => {
+      this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
+        this.chats=chats;
+      });
+    });
+
+    this.chatCommunicationService.refreshSidebar$.subscribe(res=>{
+      window.location.reload();
+      });
+    
   }
 
   userAuthData():void {
@@ -45,36 +51,23 @@ export class SidebarComponent {
     if (token) this.isLoggedIn = true;
     else this.isLoggedIn = false;
   }
-  addChat()
-  {
+  addChat() {
     const uuid = crypto.randomUUID();
-    console.log("UUID: ",uuid) 
-    this.startNewChat(1, uuid)
-    this.router.navigate(['chat/', uuid]);
-  }
-
-  // addChat()
-  // {
-  //   const uuid = crypto.randomUUID();
-  //   console.log("UUID: ",uuid) 
-  //   console.log(this.chats)
-  //   this.chats.push(this.chatCommunicationService.startNewChat(this.user_id, uuid));
-  //   console.log(this.chats);  
-  //   this.router.navigate(['chat/', uuid]);
-  // }
-
-  // loadChats(){
-  //   // this.chats = this.chatCommunicationService.getAllChatsTest()
-  //   this.chatCommunicationService.getAllChats(this.user_id,(chats:any) => {
-  //     this.chats=chats;
-  //   });
-  // }
-
-  startNewChat(userId: number, uuid: string): Chat {
-    console.log("usli u startNewChat")
-    const newChat: Chat = { id: uuid, name: "New Chat", userId };
-    this.chats.push(newChat);
-    return newChat;
+    console.log("Generated UUID:", uuid);
+  
+    const navSub = this.router.events
+    .pipe(
+      filter((event: RouterEvent): event is NavigationEnd => event instanceof NavigationEnd)
+    )
+    .subscribe(() => {
+      setTimeout(() => {
+        this.chats = this.chatCommunicationService.startNewChat(this.user_id, uuid);
+        console.log("Chats after route loaded:", this.chats);
+        navSub.unsubscribe();
+      }, 1000);
+    });
+  
+    this.router.navigate(['chat', uuid]);
   }
 
   // refresh(){

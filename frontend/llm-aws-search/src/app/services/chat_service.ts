@@ -34,56 +34,33 @@ export class ChatCommunicationService {
     this.refreshSidebarSubject.next();
   }
 
-  startNewChat(userId: number, uuid: string): Chat {
-    console.log("usli u startNewChat")
-    const newChat: Chat = { id: uuid, name: "New Chat", userId };
-    this.chats.push(newChat);
-    this.newChatSubject.next(newChat);
-    return newChat;
-  }
+  // startNewChat(userId: number, uuid: string): Chat {
+  //   console.log("usli u startNewChat")
+  //   const newChat: Chat = { id: uuid, name: "New Chat", userId };
+  //   this.chats.push(newChat);
+  //   this.newChatSubject.next(newChat);
+  //   return newChat;
+  // }
 
-  getAllChatsTest(): Chat[] {
-    // ovde ce da ide GET https koji ce da fecuje sve chatove i smestace ih u this.chats listu. mora tako zato sto je sidebar komponenta postavljena u chatbotpge componetnu, i kada se kreira refresuje ta stranica refersuje se i sidebar sto je no bueno.
-    console.log("Usli u getAllChats")
-    const ampleChats: Chat[] = [
-      {
-        id: 'bfe94170-b955-47a7-9d94-86e2891dd183',
-        name: 'New Chat - Alpha',
-        userId: 10
-      },
-      {
-        id: 'b2c3d4e5-f6a7-8901-2345-bcdefa234567',
-        name: 'New Chat - Bravo',
-        userId: 10
-      },
-      {
-        id: 'c3d4e5f6-a7b8-9012-3456-cdefab345678',
-        name: 'New Chat - Charlie',
-        userId: 10
-      },
-      {
-        id: 'd4e5f6a7-b8c9-0123-4567-defabc456789',
-        name: 'New Chat - Delta',
-        userId: 10
-      },
-      {
-        id: 'e5f6a7b8-c9d0-1234-5678-efabcd567890',
-        name: 'New Chat - Echo',
-        userId: 10
-      }
-    ];
-    this.chats = ampleChats
-    return this.chats
-  }
-  
-  createNewChat(userId: number, uuid: string): Chat[] {
+  startNewChat(userId: string, uuid: string): Chat[] {
     console.log("usli u startNewChat")
     const newChat: Chat = { id: uuid, name: "New Chat", userId };
     this.chats.push(newChat);
     console.log("newly created chat:"+newChat)
     return this.chats;
   }
-
+  saveTitleLocally(userId: string, uuid: string,title:string): Chat[] {
+    console.log("UUID U SAVE TITLE LOCALLY" + uuid)
+    const newChat: Chat = { id: uuid, name: title, userId };
+    const existingChatIndex = this.chats.findIndex(chat => chat.id === uuid);
+    if (existingChatIndex !== -1) {
+      // If chat with the same id exists, update the chat
+      this.chats[existingChatIndex] = { ...this.chats[existingChatIndex], name: title };
+    } else {
+      this.chats.push(newChat);
+    }
+    return this.chats;
+  }
   getAllChats(user_id: string, callback: (chats: Chat[]) => void): void {
     
     this.getUserChats(user_id).subscribe((response: any) => {

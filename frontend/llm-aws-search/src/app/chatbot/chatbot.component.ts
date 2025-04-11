@@ -58,8 +58,22 @@ constructor(
 
     // create new chat in sidebar component
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
-    this.chatCommunicationService.saveChat(this.user_id,userMessage,uuid).subscribe();
-    this.chatCommunicationService.startNewChat(this.user_id,uuid);
+    this.chatCommunicationService.saveChat(this.user_id,userMessage,uuid).subscribe({
+      next: (response: any) => {
+        const parsedResponse = response?.response;
+        console.log("ovo je response generate title:" + parsedResponse)
+        this.chatCommunicationService.saveTitleLocally(this.user_id, uuid, parsedResponse);
+        console.log("Title saved locally.");
+
+        // Optionally refresh UI or notify user
+
+        // If you really want a page refresh, you can emit the refresh event:
+        // this.chatCommunicationService.refreshPage$.next(true);
+      },
+      error: (err:any) => {
+        console.error("Error saving chat title:", err);
+      }
+    });
     this.router.navigate(['/chat', uuid]);
   }
 

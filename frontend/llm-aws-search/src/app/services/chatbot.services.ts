@@ -63,7 +63,7 @@ export class ChatService{
     startNewChat(userId:any, chat_id:any):Chat[]
     {
       const randomName = this.generateRandomName(10);
-      this.chats.push({userId:1,name:randomName,id:chat_id})
+      this.chats.push({userId,name:randomName,id:chat_id})
       console.log(this.chats);
       return this.chats;
     }
