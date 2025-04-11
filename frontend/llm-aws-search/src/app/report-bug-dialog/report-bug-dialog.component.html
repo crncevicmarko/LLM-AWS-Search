@@ -1,16 +1,6 @@
 <h2 mat-dialog-title>Report Bug</h2>
 
 <form [formGroup]="bugForm" class="bug-form" (ngSubmit)="onReport()">
-  <mat-form-field appearance="outline" class="full-width">
-    <!-- <mat-label>Email</mat-label> -->
-    <input matInput placeholder="Enter your email" formControlName="email" />
-    <mat-error *ngIf="bugForm.get('email')?.hasError('required')">
-      Email is required
-    </mat-error>
-    <mat-error *ngIf="bugForm.get('email')?.hasError('email')">
-      Enter a valid email
-    </mat-error>
-  </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width">
     <!-- <mat-label>Bug Description</mat-label> -->

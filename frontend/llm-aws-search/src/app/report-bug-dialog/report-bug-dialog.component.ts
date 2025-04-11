@@ -24,7 +24,7 @@ export class ReportBugDialogComponent {
     private snackBar: MatSnackBar
   ) {
     this.bugForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      // email: ['', [Validators.required, Validators.email]],
       description: ['', [Validators.required, Validators.minLength(5)]]
     });
   }
