@@ -60,6 +60,11 @@ def handler(event, context):
         # Return the title in the response
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST, GET",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization"
+            },
             "body": json.dumps({"chat_id": chat_id, "title": chat_title})
         }
 

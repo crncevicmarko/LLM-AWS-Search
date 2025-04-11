@@ -22,7 +22,12 @@ export class ChatService{
 
         return this.http.post<any>(this.apiHost+ '/test-chatbot',userMessage, {headers: this.headers})
     }
+    getUserChats(userId: string): Observable<Chat[]> {
 
+      return this.http.get<any[]>(`${this.apiHost}/chats-by-user?user_id=`+userId, { headers: this.headers })
+          
+  }
+    
     getChatsById(chat_id: string): Observable<any> {
       const params = new HttpParams().set('chat_id', chat_id);
 
@@ -31,6 +36,7 @@ export class ChatService{
         params,
         responseType: 'json'
       });
+      return new Observable;
     }
 
     postNewChatMessage(user_id: string, chat_id: string, userMessage: string, chatMessage: string) {
@@ -40,9 +46,7 @@ export class ChatService{
         user_message: userMessage,
         chat_message: chatMessage
       };
-      console.log("Body: ", body)
-      // console.log("Url: ", this.dinamoDBUrlPostChatHistory)
-
+      console.log("Body: ", body)  
       return this.http.post<any>(this.apiHost+ '/save-message', body, {headers: this.headers});
     }
 
@@ -59,7 +63,7 @@ export class ChatService{
     startNewChat(userId:any, chat_id:any):Chat[]
     {
       const randomName = this.generateRandomName(10);
-      this.chats.push({userId:1,name:randomName,id:chat_id})
+      this.chats.push({userId,name:randomName,id:chat_id})
       console.log(this.chats);
       return this.chats;
     }

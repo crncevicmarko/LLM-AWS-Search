@@ -5,7 +5,9 @@
       <div class="chat-box-container">
         <div class="nav-bar">
           <h1 class="chat-box-header">tixie.</h1>
-
+          <button mat-raised-button class="report-bug-btn" (click)="reportBug()" >
+            Report bug
+          </button>
           <button mat-raised-button class="log-out-btn" (click)="logOut()" >
             Log out
           </button>
@@ -20,7 +22,7 @@
             </div>
             <div class="ai-block">
               <p class="time-style">{{ pair.timestamp }}</p>
-              <p class="ai">ChatBot:</p>
+              <p class="ai">Tixie:</p>
               <p class="ai-text" [innerHTML]="pair.bot"></p>
             </div>
           </div>

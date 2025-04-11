@@ -14,40 +14,35 @@ def get_secret(secret_arn):
     secret = json.loads(response["SecretString"])
     return secret
 
-
 def generate_response_from_llm(prompt):
-    try:
-       
-        request_body = {
-            "anthropic_version": "bedrock-2023-05-31",
-            "max_tokens": 20,  # Adjust as needed
-            "system" : "You are a title generator for a Jira chat bot. Create a 3-5 word title for the user's input. Do NOT answer the question. "
-            "Most of the questions will be about Jira tickets so do not include that part in the title. "
-            "Do not apply any text styling just return plain text. Start each title with an uppercase letter",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [{"type": "text", "text": prompt}]  # Haiku requires "type" and "text"
-                }
-            ]
-        }
-
-        response = bedrock_client.invoke_model(
-            modelId="anthropic.claude-3-haiku-20240307-v1:0",  # Haiku model ID
-            body=json.dumps(request_body),
-            accept="application/json",
-            contentType="application/json"
-        )
-
-        response_body = json.loads(response['body'].read().decode('utf-8'))
-        
-        # Extract response from Haiku's structure
-        if 'content' in response_body:
-            return response_body['content'][0]['text'].strip()
-        return "No response generated"
-
-    except Exception as e:
-        return f"Error generating response: {str(e)}"
+    model_id = "arn:aws:bedrock:eu-west-1:785202558517:inference-profile/eu.anthropic.claude-3-7-sonnet-20250219-v1:0"
+    payload = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1500,
+        "top_k": 150,
+        "stop_sequences": [],
+        "temperature": 1,
+        "top_p": 0.999,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    }
+                ]
+            }
+        ]
+    }
+    response = bedrock_client.invoke_model(
+        modelId=model_id,
+        body=json.dumps(payload),
+        contentType="application/json",
+        accept="application/json"
+    )
+    model_output = json.loads(response['body'].read().decode('utf-8'))
+    return model_output.get('content')[0].get('text')
 
 def generate_title(prompt):
    
@@ -61,11 +56,13 @@ def handler(event, context):
     try:
         body = json.loads(event["body"])
         chat_id = body["chat_id"]
+        user_id = body["user_id"]
         valueToUser=generate_title(body.get('text'))
         table.put_item(
             Item={
                 "chat_id": str(chat_id),
-                "title":valueToUser
+                "title":valueToUser,
+                "user_id":str(user_id)
             }
         )
 

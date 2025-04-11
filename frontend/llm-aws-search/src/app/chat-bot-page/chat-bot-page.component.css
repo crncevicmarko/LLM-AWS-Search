@@ -12,8 +12,16 @@ body {
 .layout-container {
   display: flex;
   height: 100vh; 
+  
 }
-
+.report-bug-btn{
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 3%;
+  background-color: #1E1E2E;
+  color: #fc0bd3 !important;
+  border: 2px solid #fc0bd3;
+}
 app-sidebar {
   width: 250px; 
   height: 100vh; 
@@ -111,6 +119,7 @@ app-sidebar {
     padding-right: 10px;
     padding-bottom: 4px;
   }
+
   .ai-text{
     overflow: auto;
     padding: 10px;
@@ -127,13 +136,13 @@ app-sidebar {
   }
   
   .ai {
-    color: #72E0FF ;
+    color: #fc0bd3 ;
   }
   .a{
     color: #b6dc76;
   }
   .person {
-    color: #fc0bd3 ;
+    color: #72E0FF ;
     
   }
   
@@ -275,4 +284,18 @@ app-sidebar {
     .chat-submit {
       float: right;
     }
+  }
+
+  .ai-text a {
+    color: #fc0bd3 !important;  /* Bright pink or any color you prefer */
+    text-decoration: underline; /* Optional: keeps underline */
+  }
+
+  .report-bug-btn{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 3%;
+    background-color: #1E1E2E;
+    color: #fc0bd3 !important;
+    border: 2px solid #fc0bd3;
   }

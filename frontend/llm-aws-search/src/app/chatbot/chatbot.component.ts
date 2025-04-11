@@ -32,11 +32,9 @@ htmlContent:string="";
 typingSpeed: number = 50;
 chatId: string = '';
 chat: any;
+user_id : any;
 constructor(
-  private chatService: ChatService,
   private chatCommunicationService: ChatCommunicationService,
-  private cdRef: ChangeDetectorRef,
-  private mdComp:MarkdownDisplayComponent,
   private route: ActivatedRoute,
   private authService: AuthService,
   private router: Router,
@@ -45,11 +43,13 @@ constructor(
 
   ngOnInit(): void {
     const token = this.authService.getAccessTokenFromLocalStorage();
+    this.user_id=this.authService.getUserID();
     if (token) this.isLoggedIn = true;
     else this.isLoggedIn = false;
     this.route.paramMap.subscribe(params => {
       this.chatId = params.get('id')!;
     });
+    
   }
 
   onSubmit() {
@@ -57,9 +57,23 @@ constructor(
     const userMessage = this.userInput;
 
     // create new chat in sidebar component
-    const newChat = this.chatCommunicationService.startNewChat(1, uuid);
-    console.log("New Chat: ", newChat)
     this.chatCommunicationService.sendUserInput(userMessage, uuid);
+    this.chatCommunicationService.saveChat(this.user_id,userMessage,uuid).subscribe({
+      next: (response: any) => {
+        const parsedResponse = response?.response;
+        console.log("ovo je response generate title:" + parsedResponse)
+        this.chatCommunicationService.saveTitleLocally(this.user_id, uuid, parsedResponse);
+        console.log("Title saved locally.");
+
+        // Optionally refresh UI or notify user
+
+        // If you really want a page refresh, you can emit the refresh event:
+        // this.chatCommunicationService.refreshPage$.next(true);
+      },
+      error: (err:any) => {
+        console.error("Error saving chat title:", err);
+      }
+    });
     this.router.navigate(['/chat', uuid]);
   }
 
