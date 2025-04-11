@@ -41,8 +41,7 @@ export class SidebarComponent {
     });
 
     this.chatCommunicationService.refreshPage$.subscribe(res=>{
-      alert("Please refresh the page.");
-
+      window.location.reload();
       });
     
   }

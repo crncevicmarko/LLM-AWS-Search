@@ -38,14 +38,25 @@ export class ChatCommunicationService {
 
 
 
-  startNewChat(userId: number, uuid: string): Chat[] {
+  startNewChat(userId: string, uuid: string): Chat[] {
     console.log("usli u startNewChat")
     const newChat: Chat = { id: uuid, name: "New Chat", userId };
     this.chats.push(newChat);
     console.log("newly created chat:"+newChat)
     return this.chats;
   }
-
+  saveTitleLocally(userId: string, uuid: string,title:string): Chat[] {
+    console.log("UUID U SAVE TITLE LOCALLY" + uuid)
+    const newChat: Chat = { id: uuid, name: title, userId };
+    const existingChatIndex = this.chats.findIndex(chat => chat.id === uuid);
+    if (existingChatIndex !== -1) {
+      // If chat with the same id exists, update the chat
+      this.chats[existingChatIndex] = { ...this.chats[existingChatIndex], name: title };
+    } else {
+      this.chats.push(newChat);
+    }
+    return this.chats;
+  }
   getAllChats(user_id: string, callback: (chats: Chat[]) => void): void {
     
     this.getUserChats(user_id).subscribe((response: any) => {

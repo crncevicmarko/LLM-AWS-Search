@@ -37,3 +37,5 @@ frontend/llm-aws-search/angular.json
 backend/layers/*.zip
 !backend/layers/create_aws_layer.sh
 !backend/layers/layer_requirements.txt
+frontend/llm-aws-search/src/env/env.ts
+frontend/llm-aws-search/src/enviroments/enviroment.ts
