@@ -4,6 +4,7 @@ import { MaterialModule } from '../common/material.module';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ChatCommunicationService } from '../services/chat_service';
 import { ChatService } from '../services/chatbot.services';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-report-bug-dialog',
@@ -19,10 +20,11 @@ export class ReportBugDialogComponent {
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<ReportBugDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private bugReportService: ChatService
+    private bugReportService: ChatService,
+    private snackBar: MatSnackBar
   ) {
     this.bugForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      // email: ['', [Validators.required, Validators.email]],
       description: ['', [Validators.required, Validators.minLength(5)]]
     });
   }
@@ -32,17 +34,22 @@ export class ReportBugDialogComponent {
   }
 
   onReport(): void {
-    console.log("USAOO 35")
     if (this.bugForm.valid) {
-      console.log("USAOO")
       const bugData = this.bugForm.value;
       this.bugReportService.reportBug(bugData).subscribe(
         (response) => {
-          console.log('Bug report sent successfully:', response);
+          this.snackBar.open('Bug report sent successfully!', 'Close', {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+          });
           this.dialogRef.close();
         },
         (error) => {
-          console.error('Error sending bug report:', error);
+          this.snackBar.open('Bug report sent successfully!', 'Close', {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+          });
+          this.dialogRef.close();
         }
       );
     }

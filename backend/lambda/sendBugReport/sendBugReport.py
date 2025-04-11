@@ -14,15 +14,13 @@ SUBJECT = "Bug Report and Fix Suggestions from Chatbot App"
 def handler(event, context):
     try:
         body = json.loads(event['body'])
-        user_email = body.get('email', 'Unknown')
+        # user_email = body.get('email', 'Unknown')
         bug_description = body.get('description', 'No description provided.')
 
         fix_suggestions = get_fix_suggestions(bug_description)
 
         email_body = f"""
         Bug Report from Tixie:
-
-        User Email: {user_email}
         Bug Description: {bug_description}
         
         Possible Fix Suggestions:
