@@ -340,7 +340,7 @@ class BackendStack(Stack):
             self, "sendBugReport",
             runtime=_lambda.Runtime.PYTHON_3_9,
             handler="sendBugReport.handler",
-            code=_lambda.Code.from_asset("lambda"),
+            code=_lambda.Code.from_asset("lambda/sendBugReport"),
             memory_size=512,
             timeout=Duration.seconds(60),
 
